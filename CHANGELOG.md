@@ -22,3 +22,4 @@
 - Added audio system core with mixer and registry.
 - Added quest system core with event integration and tests.
 - Added hotkey manager and theme system core with tests.
+- Added developer sandbox core with runtime inspector and tests.

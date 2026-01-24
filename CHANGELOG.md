@@ -10,3 +10,4 @@
 - Implemented engine spine (timing, events, module registry) with tests.
 - Added SQLite-backed snapshot persistence with tests.
 - Added JSON schema-based data pack validation with tests.
+- Added action system core registry and runner with tests.

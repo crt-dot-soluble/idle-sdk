@@ -7,3 +7,4 @@
 - Added Phase 1 architecture plan.
 - Recorded Phase 2 architecture decisions (renderer, persistence, plugin packaging).
 - Added .NET solution scaffolding with core library and tests.
+- Implemented engine spine (timing, events, module registry) with tests.

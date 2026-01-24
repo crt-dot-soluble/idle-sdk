@@ -14,3 +14,4 @@
 - Added skill system core with XP curve and tests.
 - Added combat system core with tick resolution and tests.
 - Added world/universe hierarchy core and registry with tests.
+- Added multi-currency wallet system with tests.

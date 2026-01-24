@@ -18,3 +18,4 @@
 - Added item registry and inventory system with tests.
 - Added equipment loadout system with gear bonuses and tests.
 - Added scene layer model and diff engine with tests.
+- Added achievements and collections core systems with tests.

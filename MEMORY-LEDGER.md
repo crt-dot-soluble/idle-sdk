@@ -18,3 +18,4 @@
 - 2026-01-24: Implemented item registry and inventory system with tests.
 - 2026-01-24: Implemented equipment loadout system with bonuses and tests.
 - 2026-01-24: Implemented scene layer model and diff engine with tests.
+- 2026-01-24: Implemented achievements and collections core systems with tests.

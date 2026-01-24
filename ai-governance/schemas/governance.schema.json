@@ -1,0 +1,126 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "AI Governance Policy",
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+        "version",
+        "policyGeneratedBy",
+        "bootstrap",
+        "versionControl",
+        "testing",
+        "documentation",
+        "language",
+        "autonomy",
+        "phases",
+        "ciCdEnforced",
+        "remoteRequired"
+    ],
+    "properties": {
+        "version": {
+            "type": "string"
+        },
+        "policyGeneratedBy": {
+            "type": "string"
+        },
+        "bootstrap": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "mode",
+                "skipped",
+                "timestamp"
+            ],
+            "properties": {
+                "mode": {
+                    "type": "string",
+                    "enum": [
+                        "defaults",
+                        "customize"
+                    ]
+                },
+                "skipped": {
+                    "type": "boolean"
+                },
+                "timestamp": {
+                    "type": "string"
+                }
+            }
+        },
+        "versionControl": {
+            "type": "string",
+            "enum": [
+                "git-local",
+                "git-remote",
+                "git-remote-ci"
+            ]
+        },
+        "testing": {
+            "type": "string",
+            "enum": [
+                "full",
+                "baseline"
+            ]
+        },
+        "documentation": {
+            "type": "string",
+            "enum": [
+                "inline",
+                "comments-only",
+                "generate"
+            ]
+        },
+        "language": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "primary",
+                "frameworks"
+            ],
+            "properties": {
+                "primary": {
+                    "type": "string"
+                },
+                "frameworks": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "autonomy": {
+            "type": "string",
+            "enum": [
+                "feature",
+                "milestone",
+                "fully-autonomous"
+            ]
+        },
+        "phases": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+                "required",
+                "list"
+            ],
+            "properties": {
+                "required": {
+                    "type": "boolean"
+                },
+                "list": {
+                    "type": "array",
+                    "items": {
+                        "type": "integer"
+                    }
+                }
+            }
+        },
+        "ciCdEnforced": {
+            "type": "boolean"
+        },
+        "remoteRequired": {
+            "type": "boolean"
+        }
+    }
+}

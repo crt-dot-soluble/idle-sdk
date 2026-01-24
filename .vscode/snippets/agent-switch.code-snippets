@@ -1,0 +1,56 @@
+{
+  "ArchitectAgent": {
+    "prefix": "agent:architect",
+    "body": [
+      "Act as the ARCHITECT agent.",
+      "Follow /.ai/agents/architect.md.",
+      "Task: $1"
+    ],
+    "description": "Switch Copilot to ARCHITECT agent mode"
+  },
+  "GitAgent": {
+    "prefix": "agent:git",
+    "body": [
+      "Act as the GIT agent.",
+      "Follow /.ai/agents/git.md.",
+      "Task: $1"
+    ],
+    "description": "Switch Copilot to GIT agent mode"
+  },
+  "DebugAgent": {
+    "prefix": "agent:debug",
+    "body": [
+      "Act as the DEBUG agent.",
+      "Follow /.ai/agents/debug.md.",
+      "Task: $1"
+    ],
+    "description": "Switch Copilot to DEBUG agent mode"
+  },
+  "ImplementerAgent": {
+    "prefix": "agent:implementer",
+    "body": [
+      "Act as the IMPLEMENTER agent.",
+      "Follow /.ai/agents/implementer.md.",
+      "Task: $1"
+    ],
+    "description": "Switch Copilot to IMPLEMENTER agent mode"
+  },
+  "TesterAgent": {
+    "prefix": "agent:tester",
+    "body": [
+      "Act as the TESTER agent.",
+      "Follow /.ai/agents/tester.md.",
+      "Task: $1"
+    ],
+    "description": "Switch Copilot to TESTER agent mode"
+  },
+  "RefactorAgent": {
+    "prefix": "agent:refactor",
+    "body": [
+      "Act as the REFACTOR agent.",
+      "Follow /.ai/agents/refactor.md.",
+      "Task: $1"
+    ],
+    "description": "Switch Copilot to REFACTOR agent mode"
+  }
+}

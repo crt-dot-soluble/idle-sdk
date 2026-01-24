@@ -1,0 +1,4 @@
+.wiki/
+.vscode/audit.json
+.vscode/tooling.json
+.vscode/report-bundle.zip

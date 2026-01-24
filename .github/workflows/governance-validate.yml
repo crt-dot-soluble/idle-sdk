@@ -1,0 +1,85 @@
+name: AI Governance Enforcement
+
+on: [push, pull_request]
+
+jobs:
+  enforce:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify governance files
+        run: |
+          required=(
+            CONSTITUTION.md
+            governance.config.json
+            .github/copilot-instructions.md
+            .ai/global-instructions.md
+            .ai/agents/architect.md
+            .ai/agents/git.md
+            .ai/agents/debug.md
+            .ai/agents/implementer.md
+            .ai/agents/tester.md
+            .ai/agents/refactor.md
+            .vscode/copilot.context.md
+            .vscode/tasks.json
+            scripts/bootstrap.sh
+            scripts/bootstrap.ps1
+            scripts/policy-validate.sh
+            scripts/policy-validate.ps1
+            scripts/policy-update.ps1
+            scripts/policy-update.sh
+            scripts/tooling-detect.ps1
+            scripts/tooling-detect.sh
+            scripts/spec-start.ps1
+            scripts/spec-start.sh
+            scripts/git-init.sh
+            scripts/git-init.ps1
+            TODO-LEDGER.md
+            MEMORY-LEDGER.md
+            CHANGELOG.md
+            plans/README.md
+            spec/README.md
+            docs/README.md
+            src/README.md
+            templates/README.md
+            templates/CHANGELOG.md
+            templates/CONSTITUTION.md
+            templates/MEMORY-LEDGER.md
+            templates/TODO-LEDGER.md
+            templates/PLAN.md
+            templates/SPECIFICATION.md
+          )
+          for f in "${required[@]}"; do
+            if [ ! -f "$f" ]; then
+              echo "Missing required file: $f"
+              exit 1
+            fi
+          done
+
+      - name: Verify planning docs presence (best-effort)
+        run: |
+          count=$(find plans -type f -name "*.md" | wc -l)
+          if [ "$count" -lt 1 ]; then
+            echo "Missing planning docs: add at least one markdown file under /plans"
+            exit 1
+          fi
+
+      - name: Verify implementation spec presence (best-effort)
+        run: |
+          if [ ! -f "spec/SPECIFICATION.md" ]; then
+            echo "Missing implementation spec: add /spec/SPECIFICATION.md"
+            exit 1
+          fi
+
+      - name: Enforce agent declaration (best-effort)
+        run: |
+          if grep -R "\[AGENT MODE:" -n . | wc -l | grep -q '^0$'; then
+            echo "Warning: No agent declarations detected in repo text."
+          fi
+
+      - name: CI placeholder
+        run: echo "Add language-specific tests here."
+
+      - name: Validate governance policy
+        run: bash scripts/policy-validate.sh

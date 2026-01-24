@@ -1,0 +1,706 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Activate ARCHITECT Agent",
+      "type": "shell",
+      "command": "echo 'ARCHITECT agent active. Follow /.ai/agents/architect.md'"
+    },
+    {
+      "label": "Activate GIT Agent",
+      "type": "shell",
+      "command": "echo 'GIT agent active. Follow /.ai/agents/git.md'"
+    },
+    {
+      "label": "Activate DEBUG Agent",
+      "type": "shell",
+      "command": "echo 'DEBUG agent active. Follow /.ai/agents/debug.md'"
+    },
+    {
+      "label": "Activate IMPLEMENTER Agent",
+      "type": "shell",
+      "command": "echo 'IMPLEMENTER agent active. Follow /.ai/agents/implementer.md'"
+    },
+    {
+      "label": "Activate TESTER Agent",
+      "type": "shell",
+      "command": "echo 'TESTER agent active. Follow /.ai/agents/tester.md'"
+    },
+    {
+      "label": "Activate REFACTOR Agent",
+      "type": "shell",
+      "command": "echo 'REFACTOR agent active. Follow /.ai/agents/refactor.md'"
+    },
+    {
+      "label": "Governance Bootstrap",
+      "type": "shell",
+      "dependsOn": [
+        "Governance Preflight"
+      ],
+      "dependsOrder": "sequence",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/bootstrap.ps1",
+        "-Mode",
+        "${input:bootstrapMode}",
+        "-VersionControl",
+        "${input:versionControlPolicy}",
+        "-Testing",
+        "${input:testingPolicy}",
+        "-Documentation",
+        "${input:documentationPolicy}",
+        "-Language",
+        "${input:primaryLanguage}",
+        "-Frameworks",
+        "${input:frameworks}",
+        "-Autonomy",
+        "${input:autonomyPolicy}",
+        "-IncludeWorkspaceFile",
+        "${input:includeWorkspaceFile}"
+      ],
+      "linux": {
+        "command": "bash",
+        "args": [
+          "scripts/bootstrap.sh",
+          "${input:bootstrapMode}",
+          "${input:versionControlPolicy}",
+          "${input:testingPolicy}",
+          "${input:documentationPolicy}",
+          "${input:primaryLanguage}",
+          "${input:frameworks}",
+          "${input:autonomyPolicy}"
+        ]
+      },
+      "osx": {
+        "command": "bash",
+        "args": [
+          "scripts/bootstrap.sh",
+          "${input:bootstrapMode}",
+          "${input:versionControlPolicy}",
+          "${input:testingPolicy}",
+          "${input:documentationPolicy}",
+          "${input:primaryLanguage}",
+          "${input:frameworks}",
+          "${input:autonomyPolicy}"
+        ]
+      }
+    },
+    {
+      "label": "Governance Bootstrap (Defaults)",
+      "type": "shell",
+      "dependsOn": [
+        "Governance Preflight"
+      ],
+      "dependsOrder": "sequence",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/bootstrap.ps1",
+        "-Mode",
+        "defaults"
+      ],
+      "linux": {
+        "command": "bash",
+        "args": [
+          "scripts/bootstrap.sh",
+          "defaults"
+        ]
+      },
+      "osx": {
+        "command": "bash",
+        "args": [
+          "scripts/bootstrap.sh",
+          "defaults"
+        ]
+      }
+    },
+    {
+      "label": "Governance Preflight",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/tooling-detect.ps1"
+      ],
+      "linux": {
+        "command": "bash",
+        "args": [
+          "scripts/tooling-detect.sh"
+        ]
+      },
+      "osx": {
+        "command": "bash",
+        "args": [
+          "scripts/tooling-detect.sh"
+        ]
+      }
+    },
+    {
+      "label": "Governance Init Repository",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/init-governance.ps1",
+        "-SpecPath",
+        "${input:specPath}"
+      ],
+      "linux": {
+        "command": "bash",
+        "args": [
+          "scripts/init-governance.sh",
+          "${input:specPath}"
+        ]
+      },
+      "osx": {
+        "command": "bash",
+        "args": [
+          "scripts/init-governance.sh",
+          "${input:specPath}"
+        ]
+      }
+    },
+    {
+      "label": "Governance Policy Validate",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/policy-validate.ps1"
+      ],
+      "linux": {
+        "command": "bash",
+        "args": [
+          "scripts/policy-validate.sh"
+        ]
+      },
+      "osx": {
+        "command": "bash",
+        "args": [
+          "scripts/policy-validate.sh"
+        ]
+      }
+    },
+    {
+      "label": "Governance Git Init",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/git-init.ps1"
+      ],
+      "linux": {
+        "command": "bash",
+        "args": [
+          "scripts/git-init.sh"
+        ]
+      },
+      "osx": {
+        "command": "bash",
+        "args": [
+          "scripts/git-init.sh"
+        ]
+      }
+    },
+    {
+      "label": "Governance Wiki Sync",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/sync-wiki.ps1"
+      ],
+      "linux": {
+        "command": "bash",
+        "args": [
+          "scripts/sync-wiki.sh"
+        ]
+      },
+      "osx": {
+        "command": "bash",
+        "args": [
+          "scripts/sync-wiki.sh"
+        ]
+      }
+    },
+    {
+      "label": "Governance Report Bundle",
+      "type": "shell",
+      "dependsOn": [
+        "Governance Preflight",
+        "Governance Self-Audit",
+        "Governance Policy Validate"
+      ],
+      "dependsOrder": "sequence",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/report-bundle.ps1",
+        "-OutputPath",
+        "${input:reportOutputPath}"
+      ],
+      "linux": {
+        "command": "bash",
+        "args": [
+          "scripts/report-bundle.sh",
+          "${input:reportOutputPath}"
+        ]
+      },
+      "osx": {
+        "command": "bash",
+        "args": [
+          "scripts/report-bundle.sh",
+          "${input:reportOutputPath}"
+        ]
+      }
+    },
+    {
+      "label": "Governance Self-Audit",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/self-audit.ps1"
+      ],
+      "linux": {
+        "command": "bash",
+        "args": [
+          "scripts/self-audit.sh"
+        ]
+      },
+      "osx": {
+        "command": "bash",
+        "args": [
+          "scripts/self-audit.sh"
+        ]
+      }
+    },
+    {
+      "label": "Governance Policy Revision",
+      "type": "shell",
+      "dependsOn": [
+        "Governance Preflight"
+      ],
+      "dependsOrder": "sequence",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/policy-update.ps1",
+        "-VersionControl",
+        "${input:versionControlPolicy}",
+        "-Testing",
+        "${input:testingPolicy}",
+        "-Documentation",
+        "${input:documentationPolicy}",
+        "-Language",
+        "${input:primaryLanguage}",
+        "-Frameworks",
+        "${input:frameworks}",
+        "-Autonomy",
+        "${input:autonomyPolicy}"
+      ],
+      "linux": {
+        "command": "bash",
+        "args": [
+          "scripts/policy-update.sh",
+          "${input:versionControlPolicy}",
+          "${input:testingPolicy}",
+          "${input:documentationPolicy}",
+          "${input:primaryLanguage}",
+          "${input:frameworks}",
+          "${input:autonomyPolicy}"
+        ]
+      },
+      "osx": {
+        "command": "bash",
+        "args": [
+          "scripts/policy-update.sh",
+          "${input:versionControlPolicy}",
+          "${input:testingPolicy}",
+          "${input:documentationPolicy}",
+          "${input:primaryLanguage}",
+          "${input:frameworks}",
+          "${input:autonomyPolicy}"
+        ]
+      }
+    },
+    {
+      "label": "Set Autonomy Policy",
+      "type": "shell",
+      "dependsOn": [
+        "Governance Preflight"
+      ],
+      "dependsOrder": "sequence",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/policy-update.ps1",
+        "-Autonomy",
+        "${input:autonomyPolicy}"
+      ],
+      "linux": {
+        "command": "bash",
+        "args": [
+          "scripts/policy-update.sh",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "${input:autonomyPolicy}"
+        ]
+      },
+      "osx": {
+        "command": "bash",
+        "args": [
+          "scripts/policy-update.sh",
+          "",
+          "",
+          "",
+          "",
+          "",
+          "${input:autonomyPolicy}"
+        ]
+      }
+    },
+    {
+      "label": "Set Workflow Mode",
+      "type": "shell",
+      "dependsOn": [
+        "Governance Preflight"
+      ],
+      "dependsOrder": "sequence",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/policy-update.ps1",
+        "-VersionControl",
+        "${input:versionControlPolicy}"
+      ],
+      "linux": {
+        "command": "bash",
+        "args": [
+          "scripts/policy-update.sh",
+          "${input:versionControlPolicy}"
+        ]
+      },
+      "osx": {
+        "command": "bash",
+        "args": [
+          "scripts/policy-update.sh",
+          "${input:versionControlPolicy}"
+        ]
+      }
+    },
+    {
+      "label": "Start Spec Implementation",
+      "type": "shell",
+      "dependsOn": [
+        "Governance Bootstrap"
+      ],
+      "dependsOrder": "sequence",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/spec-start.ps1"
+      ],
+      "linux": {
+        "command": "bash",
+        "args": [
+          "scripts/spec-start.sh"
+        ]
+      },
+      "osx": {
+        "command": "bash",
+        "args": [
+          "scripts/spec-start.sh"
+        ]
+      }
+    },
+    {
+      "label": "Record Architecture Decisions",
+      "type": "shell",
+      "command": "powershell",
+      "args": [
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "scripts/record-architecture-decisions.ps1",
+        "-Renderer",
+        "${input:rendererChoice}",
+        "-Persistence",
+        "${input:persistenceChoice}",
+        "-PluginPackaging",
+        "${input:pluginPackagingChoice}"
+      ],
+      "linux": {
+        "command": "bash",
+        "args": [
+          "scripts/record-architecture-decisions.sh",
+          "${input:rendererChoice}",
+          "${input:persistenceChoice}",
+          "${input:pluginPackagingChoice}"
+        ]
+      },
+      "osx": {
+        "command": "bash",
+        "args": [
+          "scripts/record-architecture-decisions.sh",
+          "${input:rendererChoice}",
+          "${input:persistenceChoice}",
+          "${input:pluginPackagingChoice}"
+        ]
+      }
+    }
+  ],
+  "inputs": [
+    {
+      "id": "reportOutputPath",
+      "type": "promptString",
+      "description": "Report bundle output path",
+      "default": ".vscode/report-bundle.zip"
+    },
+    {
+      "id": "specPath",
+      "type": "promptString",
+      "description": "Path to SPECIFICATION.md for initializer"
+    },
+    {
+      "id": "includeWorkspaceFile",
+      "type": "pickString",
+      "description": "Include VS Code workspace file for optimal experience?",
+      "options": [
+        "Yes (recommended)",
+        "No"
+      ],
+      "default": "Yes (recommended)"
+    },
+    {
+      "id": "bootstrapMode",
+      "type": "pickString",
+      "description": "Bootstrap mode",
+      "options": [
+        "defaults",
+        "customize"
+      ]
+    },
+    {
+      "id": "versionControlPolicy",
+      "type": "pickString",
+      "description": "Version control policy",
+      "options": [
+        "git-local",
+        "git-remote",
+        "git-remote-ci"
+      ]
+    },
+    {
+      "id": "testingPolicy",
+      "type": "pickString",
+      "description": "Testing policy",
+      "options": [
+        "full",
+        "baseline"
+      ]
+    },
+    {
+      "id": "documentationPolicy",
+      "type": "pickString",
+      "description": "Documentation policy",
+      "options": [
+        "inline",
+        "comments-only",
+        "generate"
+      ]
+    },
+    {
+      "id": "primaryLanguage",
+      "type": "pickString",
+      "description": "Primary language",
+      "options": [
+        "C",
+        "C++",
+        "C#",
+        "F#",
+        "Go",
+        "Rust",
+        "Python",
+        "Java",
+        "Kotlin",
+        "Scala",
+        "JavaScript",
+        "TypeScript",
+        "Ruby",
+        "PHP",
+        "Swift",
+        "Objective-C",
+        "Dart",
+        "R",
+        "MATLAB",
+        "Julia",
+        "Haskell",
+        "Elixir",
+        "Erlang",
+        "OCaml",
+        "Clojure",
+        "Lua",
+        "Shell",
+        "PowerShell",
+        "SQL",
+        "HTML/CSS",
+        "Other"
+      ]
+    },
+    {
+      "id": "frameworks",
+      "type": "pickString",
+      "description": "Framework / runtime (select the closest match)",
+      "options": [
+        "None",
+        "Node.js",
+        "Deno",
+        "Bun",
+        "React",
+        "Next.js",
+        "Remix",
+        "Vue",
+        "Nuxt",
+        "Svelte",
+        "SvelteKit",
+        "Angular",
+        "Express",
+        "NestJS",
+        "Fastify",
+        "Hapi",
+        "Koa",
+        "Spring Boot",
+        "Spring",
+        "Micronaut",
+        "Quarkus",
+        "Jakarta EE",
+        "Play",
+        "Django",
+        "Flask",
+        "FastAPI",
+        "Pyramid",
+        "Tornado",
+        "Sanic",
+        "Ruby on Rails",
+        "Sinatra",
+        "Hanami",
+        "Laravel",
+        "Symfony",
+        "Slim",
+        "CodeIgniter",
+        "ASP.NET Core",
+        "Blazor",
+        "MAUI",
+        "Xamarin",
+        "WPF",
+        "WinUI",
+        "Qt",
+        "GTK",
+        "Electron",
+        "Tauri",
+        "Flutter",
+        "React Native",
+        "Ionic",
+        "Unity",
+        "Unreal Engine",
+        "Godot",
+        "TensorFlow",
+        "PyTorch",
+        "JAX",
+        "Hugging Face",
+        "scikit-learn",
+        "Spark",
+        "Hadoop",
+        "Kafka",
+        "Airflow",
+        "Beam",
+        "Ray",
+        "gRPC",
+        "REST",
+        "GraphQL",
+        "tRPC",
+        "OpenAPI",
+        "Serverless",
+        "AWS Lambda",
+        "Azure Functions",
+        "Google Cloud Functions",
+        "Other"
+      ]
+    },
+    {
+      "id": "autonomyPolicy",
+      "type": "pickString",
+      "description": "Autonomy & feedback policy",
+      "options": [
+        "feature",
+        "milestone",
+        "fully-autonomous"
+      ]
+    },
+    {
+      "id": "rendererChoice",
+      "type": "pickString",
+      "description": "Renderer abstraction (Phase 2 decision)",
+      "options": [
+        "WebAssembly (C# → WASM + TS/JS renderer)",
+        "Avalonia",
+        "MonoGame",
+        "Custom abstraction (engine-owned)",
+        "Other"
+      ]
+    },
+    {
+      "id": "persistenceChoice",
+      "type": "pickString",
+      "description": "Persistence backend default (Phase 2 decision)",
+      "options": [
+        "SQLite",
+        "LiteDB",
+        "File-based JSON snapshots",
+        "Other"
+      ]
+    },
+    {
+      "id": "pluginPackagingChoice",
+      "type": "pickString",
+      "description": "Plugin packaging format (Phase 2 decision)",
+      "options": [
+        "NuGet package",
+        "Zip module pack",
+        "Directory manifest",
+        "Other"
+      ]
+    }
+  ]
+}

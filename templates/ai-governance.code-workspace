@@ -1,0 +1,80 @@
+{
+    // Agentic Viber Workspace: Optimized for multi-agent, governance-driven coding
+    "folders": [
+        // Root for all project files
+        {
+            "path": "."
+        },
+        // Implementation source code
+        {
+            "path": "src"
+        },
+        // Machine-first implementation specs
+        {
+            "path": "spec"
+        },
+        // Planning, phasing, and work breakdown
+        {
+            "path": "plans"
+        },
+        // Governance-aligned documentation
+        {
+            "path": "docs"
+        },
+        // Templates for root-level governance files
+        {
+            "path": "templates"
+        }
+    ],
+    "settings": {
+        // Enforce consistent formatting and tab size
+        "editor.formatOnSave": true,
+        "editor.tabSize": 2,
+        // Hide git and system files from explorer
+        "files.exclude": {
+            "**/.git": true,
+            "**/.DS_Store": true
+        },
+        // Recommended: enable breadcrumbs for agent navigation
+        "breadcrumbs.enabled": true,
+        // Recommended: highlight TODOs and agent mode switches
+        "todo-tree.highlights.enabled": true
+    },
+    "extensions": {
+        "recommendations": [
+            // Python support for governance scripts and agentic workflows
+            "ms-python.python",
+            // GitHub Copilot for agentic code generation
+            "GitHub.copilot",
+            // Markdown tools for governance docs
+            "yzhang.markdown-all-in-one",
+            // TODO Tree for agentic TODOs and ledgers
+            "Gruntfuggly.todo-tree",
+            // YAML support for CI/CD and governance config
+            "redhat.vscode-yaml"
+        ]
+    },
+    "tasks": {
+        "version": "2.0.0",
+        "tasks": [
+            // Preflight: detect available tooling for governance
+            {
+                "label": "Governance Preflight",
+                "type": "shell",
+                "command": "powershell scripts/tooling-detect.ps1"
+            },
+            // Bootstrap: run governance policy setup
+            {
+                "label": "Governance Bootstrap",
+                "type": "shell",
+                "command": "powershell scripts/bootstrap.ps1"
+            },
+            // Start: begin implementation from spec
+            {
+                "label": "Start Spec Implementation",
+                "type": "shell",
+                "command": "powershell scripts/spec-start.ps1"
+            }
+        ]
+    }
+}

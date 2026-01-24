@@ -1,0 +1,60 @@
+{
+    "version": "1.0.0",
+    "generated": "2026-01-23",
+    "schemas": [
+        "schemas/governance.schema.json"
+    ],
+    "requiredDirectories": [
+        ".ai",
+        ".vscode",
+        "scripts",
+        "templates",
+        "docs",
+        "plans",
+        "src",
+        "spec",
+        ".github",
+        "schemas"
+    ],
+    "requiredFiles": [
+        "CONSTITUTION.md",
+        "MEMORY-LEDGER.md",
+        "TODO-LEDGER.md",
+        "CHANGELOG.md",
+        "governance.config.json",
+        "spec/SPECIFICATION.md",
+        "manifest.json"
+    ],
+    "scripts": [
+        "bootstrap",
+        "git-init",
+        "init-governance",
+        "policy-update",
+        "policy-validate",
+        "report-bundle",
+        "self-audit",
+        "spec-start",
+        "sync-wiki",
+        "tooling-detect"
+    ],
+    "tasks": [
+        "Governance Preflight",
+        "Governance Init Repository",
+        "Governance Policy Validate",
+        "Governance Git Init",
+        "Governance Wiki Sync",
+        "Governance Self-Audit",
+        "Governance Bootstrap",
+        "Governance Bootstrap (Defaults)",
+        "Governance Policy Revision",
+        "Set Autonomy Policy",
+        "Set Workflow Mode",
+        "Start Spec Implementation",
+        "Governance Report Bundle"
+    ],
+    "reports": [
+        "reports/audit.json",
+        "reports/tooling.json",
+        "reports/report-bundle.zip"
+    ]
+}

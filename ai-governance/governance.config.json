@@ -1,0 +1,32 @@
+﻿{
+    "version":  "1.0.0",
+    "policyGeneratedBy":  "bootstrap",
+    "bootstrap":  {
+                      "mode":  "defaults",
+                      "skipped":  true,
+                      "timestamp":  "2026-01-23"
+                  },
+    "versionControl":  "git-remote-ci",
+    "testing":  "full",
+    "documentation":  "inline",
+    "language":  {
+                     "primary":  "unspecified",
+                     "frameworks":  [
+
+                                    ]
+                 },
+    "autonomy":  "feature",
+    "phases":  {
+                   "required":  true,
+                   "list":  [
+                                0,
+                                1,
+                                2,
+                                3,
+                                4,
+                                5
+                            ]
+               },
+    "ciCdEnforced":  true,
+    "remoteRequired":  true
+}

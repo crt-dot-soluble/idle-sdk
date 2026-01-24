@@ -11,3 +11,4 @@
 - 2026-01-24: Added snapshot persistence interfaces and SQLite-backed store with tests.
 - 2026-01-24: Implemented JSON schema data pack validation with NJsonSchema and tests.
 - 2026-01-24: Implemented action system core (registry, runner, definitions) with tests.
+- 2026-01-24: Implemented skill system core (registry, XP curve, progression) with tests.

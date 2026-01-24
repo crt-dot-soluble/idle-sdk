@@ -11,3 +11,4 @@
 - Added SQLite-backed snapshot persistence with tests.
 - Added JSON schema-based data pack validation with tests.
 - Added action system core registry and runner with tests.
+- Added skill system core with XP curve and tests.

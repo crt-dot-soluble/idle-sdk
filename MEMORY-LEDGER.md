@@ -28,4 +28,5 @@
 - 2026-01-24: Implemented Avalonia demo app with minimal Melvor-style view and end-to-end feature wiring.
 - 2026-01-24: Implemented layered generator, crafting, trade, and compendium registries with tests; wired into demo view.
 - 2026-01-24: Refined demo UI layout with tabbed panels to reduce clutter.
+- 2026-01-24: Drafted engine feature roadmap in plans/ENGINE-ROADMAP.md.
 - 2026-01-24: Defined demo requirements: Avalonia desktop UI with minimal Melvor-style view and full feature wiring.

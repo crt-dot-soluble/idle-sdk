@@ -28,4 +28,5 @@
 - Added Avalonia demo app wiring engine features with tests.
 - Added layered generator, crafting, trade, and compendium core systems with tests.
 - Refined demo UI layout for reduced clutter.
+- Added engine feature roadmap.
 - Added demo implementation requirements to spec.

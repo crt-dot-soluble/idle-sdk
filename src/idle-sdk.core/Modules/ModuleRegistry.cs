@@ -19,6 +19,19 @@ public sealed class ModuleRegistry
         _modules[module.Name] = module;
     }
 
+    public void RegisterRange(IEnumerable<IModule> modules)
+    {
+        if (modules is null)
+        {
+            throw new ArgumentNullException(nameof(modules));
+        }
+
+        foreach (var module in modules)
+        {
+            Register(module);
+        }
+    }
+
     public IReadOnlyCollection<IModule> Modules => _modules.Values.ToList();
 
     public IReadOnlyList<IModule> ResolveLoadOrder()

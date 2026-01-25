@@ -54,6 +54,10 @@ Content packs are JSON‑only bundles:
 
 Packs can be enabled/disabled and hot‑reloaded at runtime. No code changes required.
 
+## Logs
+- Local app logs: %LocalAppData%\idle-sdk-demo\logs\demo.log
+- Workspace mirror: logs\demo.log
+
 ## Usage
 - Use the core systems in src/idle-sdk.core
 - Add JSON content packs for new skills, quests, items, areas, and combat profiles

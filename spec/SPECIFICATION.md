@@ -17,12 +17,19 @@
    - FR-2: Provide a strongly-typed event bus for cross-module communication with publish/subscribe semantics.
    - FR-3: Provide a module/plugin system with discovery, versioned dependencies, and safe hot-load capabilities.
    - FR-4: Define data-driven action, skill, and combat systems with schema-based configuration.
+     - Actions must support cooldowns, tags, and modifier hooks.
+     - Skills must support level-based unlock milestones.
+     - Combat must support status effects and AI-driven target selection.
    - FR-5: Represent world data with hierarchical structures (Universe → World → Region → Zone → Node) with exploration tracking.
    - FR-6: Provide a scene/renderer interface that consumes simulation state and emits scene layer updates.
    - FR-7: Provide a deterministic layered generator for items/characters/cosmetics based on seeds, rarity weights, and exclusion rules.
    - FR-8: Provide account/profile, inventory, and multi-currency wallet systems with offline-safe accounting.
    - FR-9: Provide a persistence layer with snapshot-based save/load and plugin-safe serialization.
    - FR-10: Provide a developer sandbox for runtime inspection, data reload, and state mutation.
+    - FR-11: Provide a content pack system that can be added, enabled/disabled, and hot-reloaded without code changes.
+       - Content packs are JSON-based and validated against schemas.
+       - Packs are sandboxed (no code execution) and can be dynamically toggled at runtime.
+       - Pack changes are surfaced as deterministic reload events.
 - Non-functional requirements:
    - NFR-1 (performance): Simulation must sustain at least 60 ticks/second for baseline content on a mid-tier desktop CPU.
    - NFR-2 (security): No arbitrary code execution from data packs; plugin loading must be explicit and versioned.
@@ -34,7 +41,8 @@
 ## Interfaces
 - Inputs (schemas, validation rules):
    - Module manifests: name, version, dependencies, entry points, schema versions.
-   - Data packs: actions, skills, items, worlds, enemies, loot tables, layers, and UI panel descriptors.
+   - Content packs: pack manifest, module list, data catalog, schema versions, dependencies, and enable/disable flags.
+   - Data packs: actions, skills, items, worlds, enemies, loot tables, layers, UI panel descriptors, action modifiers, status effects, combat AI profiles, quests, achievements, collections, audio, trade, crafting, and compendium entries.
    - Runtime configuration: tick rate, offline reconciliation limits, logging level, sandbox permissions.
 - Outputs (schemas, guarantees):
    - Simulation state snapshots (versioned, deterministic, diffable).
@@ -50,13 +58,13 @@
    - Core loop (`SimulationClock`, `TickScheduler`)
    - Event bus (`EventHub`, `EventSubscription`)
    - Module system (`ModuleRegistry`, `ModuleLoader`)
-   - Data layer (`SchemaValidator`, `DataPackLoader`)
+   - Data layer (`SchemaValidator`, `DataPackLoader`, `ContentPackRegistry`, `ContentPackManager`)
    - Gameplay systems (Actions, Skills, Combat, World, Economy, Items)
    - Scene interface (`SceneAdapter`, `SceneLayerModel`)
    - Persistence (`SnapshotStore`, `StateSerializer`)
    - Sandbox (`SandboxConsole`, `RuntimeInspector`)
 - Data flow:
-   - Data packs → validation → module registry → system initialization → simulation ticks → event stream → scene updates → persistence snapshots.
+   - Content packs → validation → data pack load → module registry → system initialization → simulation ticks → event stream → scene updates → persistence snapshots.
 - State management:
    - Single authoritative simulation state; mutations occur only during tick execution.
 - Dependencies (internal/external):
@@ -73,29 +81,38 @@
    - `tick(delta)` → `engine.step(delta)` → state diff → render
 
 ## Data & Storage
+- Content pack format:
+   - `pack.json` (manifest): id, name, version, schemaVersion, dependencies, modules, enabledByDefault.
+   - `data/*.json`: typed content documents (actions, skills, quests, items, worlds, etc.).
+   - Packs must be loadable without code and hot-reloadable at runtime.
+   - Enable/disable toggles must be reversible without application restart.
 - Data models:
-   - Accounts, Profiles, Wallets, Inventories, Worlds, Nodes, Items, Actions, Skills, Combat Encounters, Achievements.
+   - Accounts, Profiles, Wallets, Inventories, Worlds, Nodes, Items, Actions, Skills, Skill Unlocks, Combat Encounters, Status Effects, Combat AI Profiles, Achievements, Content Pack Manifests.
 - Persistence requirements:
    - Snapshot-based saves with versioned schema.
    - Deterministic replay input log for validation and debugging.
+   - Content pack enable/disable state persisted per profile.
 - Retention/cleanup:
    - Configurable snapshot retention (default: last 5 snapshots per profile).
 
 ## Security & Compliance
 - Threat model summary: prevent untrusted data packs from executing code; enforce deterministic seed replay; protect profile data at rest.
 - Access controls: sandbox actions require explicit enabling; file I/O restricted to engine-owned paths.
+- Content pack sandboxing: content packs cannot execute code, only declare data; pack paths are restricted to engine-owned directories.
 - Audit/telemetry: event bus supports audit events; persistence logs include schema versions and checksums.
 
 ## Observability
 - Logging requirements: structured logs for tick lifecycle, module load/unload, and persistence operations.
 - Metrics: tick duration, event throughput, save/load duration, offline reconciliation time.
 - Tracing: optional, pluggable tracing interface for long-running actions.
+- Content pack lifecycle events: pack load, enable, disable, and hot-reload must emit audit events.
 
 ## Acceptance Criteria
 - Tests to pass:
    - Deterministic replay tests for fixed seeds and event streams.
    - Schema validation tests for data packs.
    - Module load/unload lifecycle tests.
+   - Content pack validation, enable/disable, and hot-reload tests.
 - Success metrics:
    - Simulation ticks at or above target rate under baseline content.
    - Zero deterministic divergence across replay runs.
@@ -106,9 +123,9 @@
 
 ## Test Plan
 - Unit tests:
-   - Tick scheduling, event routing, schema validation, serializer integrity.
+   - Tick scheduling, event routing, schema validation, serializer integrity, action cooldown gating, action modifier application, status effect ticking/expiry, AI target selection.
 - Integration tests:
-   - Module registration with dependencies; offline progression reconciliation.
+   - Module registration with dependencies; offline progression reconciliation; content pack enable/disable and hot reload.
 - Acceptance tests:
    - End-to-end simulation replay with known outputs.
 

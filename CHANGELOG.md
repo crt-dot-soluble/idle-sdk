@@ -31,3 +31,17 @@
 - Added data pack loader, replay runner, and snapshot service with demo save/load.
 - Added engine feature roadmap.
 - Added demo implementation requirements to spec.
+- Expanded spec for action cooldowns/modifiers, skill unlocks, and combat status effects/AI targeting.
+- Implemented action cooldowns, tags, and modifiers with tests and demo updates.
+- Implemented skill unlock milestones with tracking and tests.
+- Implemented combat status effects and AI targeting with tests and demo updates.
+- Expanded spec for content packs and hot reload; refreshed human-readable README and docs index.
+- Added content pack registry/manager, schemas, hot reload events, and tests.
+- Added combat rules (stacking/caps), AI decision logging, and persistence helpers for cooldowns/effects.
+- Refined root SPECIFICATION.md with content pack and Phase B feature details.
+- Added content pack tests and combat rule validation; all tests passing.
+- Added Phase B integration test for cooldowns, unlocks, and combat effects.
+- Added content pack and module documentation; fixed hot-reload registration for new packs.
+- Added standardized demo debug logging with unhandled exception capture.
+- Fixed combat AI target selection with no available targets; added workspace log export.
+- Added engine API, schemas, and modding documentation; updated README log locations.

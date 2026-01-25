@@ -3,5 +3,6 @@ namespace IdleSdk.Core.Skills;
 public sealed record SkillDefinition(
     string Id,
     string Name,
-    int MaxLevel
+    int MaxLevel,
+    IReadOnlyDictionary<int, string> Unlocks
 );

@@ -22,6 +22,11 @@ public sealed class DataPackValidator
         return new DataPackValidator(schema);
     }
 
+    public static Task<DataPackValidator> ForContentPackManifestAsync(CancellationToken cancellationToken = default)
+    {
+        return FromSchemaJsonAsync(DataPackSchemas.ContentPackManifestSchema, cancellationToken);
+    }
+
     public static async Task<DataPackValidator> FromSchemaPathAsync(string schemaPath, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(schemaPath))

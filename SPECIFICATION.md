@@ -1,9 +1,9 @@
 
 # idle-sdk — Modular Idle RPG Engine Specification
 
-**Engine Name:** idle-sdk  
-**Target:** .NET 10  
-**Platforms:** Desktop-first, Web-compatible  
+**Engine Name:** idle-sdk
+**Target:** .NET 10
+**Platforms:** Desktop-first, Web-compatible
 **Philosophy:** Engine-first, game-agnostic, data-driven, AI-friendly
 
 ---
@@ -165,6 +165,8 @@ Examples:
 
 Actions define:
 - Duration
+- Cooldowns
+- Tags
 - Inputs / Outputs
 - Progression rules
 - Visual state emissions
@@ -191,6 +193,17 @@ Skills may:
 - Status effects
 - Multi-enemy encounters
 - Scriptable enemy AI behaviors
+
+---
+
+## VII. Content Packs (No-Code)
+
+Content packs are JSON-only bundles that define new content without code changes:
+- `pack.json` manifest with id, version, schema version, dependencies, and modules
+- `data/*.json` files for actions, skills, items, quests, worlds, combat profiles, and more
+
+Packs can be enabled/disabled at runtime and hot-reloaded from disk.
+All packs are sandboxed and validated against schemas before activation.
 
 ---
 

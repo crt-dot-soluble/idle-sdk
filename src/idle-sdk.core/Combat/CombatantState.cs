@@ -12,6 +12,7 @@ public sealed class CombatantState
     public string Id { get; }
     public CombatantStats Stats { get; }
     public int CurrentHealth { get; private set; }
+    public CombatantEffects Effects { get; } = new();
 
     public bool IsDefeated => CurrentHealth <= 0;
 

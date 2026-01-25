@@ -31,3 +31,16 @@
 - 2026-01-24: Implemented data pack loader, deterministic replay runner, snapshot service, and demo save/load.
 - 2026-01-24: Drafted engine feature roadmap in plans/ENGINE-ROADMAP.md.
 - 2026-01-24: Defined demo requirements: Avalonia desktop UI with minimal Melvor-style view and full feature wiring.
+- 2026-01-24: Expanded spec to define action cooldowns/modifiers, skill unlock milestones, and combat status effects/AI targeting.
+- 2026-01-24: Implemented action cooldown gating, tags, and modifier hooks in action system with tests and demo update.
+- 2026-01-24: Implemented skill unlock milestones with tracking in SkillProgress plus tests and demo data.
+- 2026-01-24: Implemented combat status effects and AI targeting with tests and demo update.
+- 2026-01-25: Expanded spec for content packs (hot reload, enable/disable, JSON manifest) and refreshed human-readable README and docs index.
+- 2026-01-25: Added content pack schemas, registry, manager with hot reload, events, and tests; added combat rules (stacking, caps), AI decision logging, and persistence helpers for cooldowns/effects.
+- 2026-01-25: Refined root SPECIFICATION.md with content pack and Phase B feature details.
+- 2026-01-25: Added content pack snapshot/validation tests, combat rule validation, and demo persistence for cooldowns/effects; tests pass.
+- 2026-01-25: Added Phase B integration test covering action cooldowns, skill unlocks, and combat effects.
+- 2026-01-25: Added content pack and plugin docs, and fixed hot-reload to register newly added packs.
+- 2026-01-25: Added standardized demo debug logging with unhandled exception capture for crash investigation.
+- 2026-01-25: Fixed combat AI target selection when no valid targets remain and mirrored demo logs to workspace logs/.
+- 2026-01-25: Generated engine API, schemas, and modding docs; updated README and docs index.

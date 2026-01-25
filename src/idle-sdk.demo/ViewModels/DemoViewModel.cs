@@ -61,17 +61,18 @@ public sealed class DemoViewModel : INotifyPropertyChanged
 
     public DemoViewModel()
     {
+        DemoLogger.Info("demo", "viewmodel-ctor");
         _clock = new SimulationClock(1);
         _scheduler = new TickScheduler(_clock);
         _offlineReconciler = new OfflineReconciler(_scheduler);
 
-        var actionDefinitions = new ActionDefinition("gather", "Gather", TimeSpan.FromSeconds(1));
+        var actionDefinitions = new ActionDefinition("gather", "Gather", TimeSpan.FromSeconds(1), TimeSpan.Zero, new[] { "gather" });
         _actionRegistry = new ActionRegistry();
         _actionRegistry.RegisterDefinition(actionDefinitions);
         _actionRunner = new ActionRunner(_actionRegistry);
 
         var skillRegistry = new SkillRegistry();
-        skillRegistry.Register(new SkillDefinition("gathering", "Gathering", 10));
+        skillRegistry.Register(new SkillDefinition("gathering", "Gathering", 10, new Dictionary<int, string> { [2] = "Unlocked: Faster gather" }));
         _skillSystem = new SkillSystem(skillRegistry, new LinearXpCurve(50, 25));
 
         var questRegistry = new QuestRegistry();
@@ -115,7 +116,8 @@ public sealed class DemoViewModel : INotifyPropertyChanged
         {
             new("player", new CombatantStats(20, 5, 1)),
             new("enemy", new CombatantStats(12, 3, 0))
-        });
+        }, new SimpleCombatAi());
+        _combatEncounter.Combatants[0].Effects.Add(new StatusEffect("battle-focus", 3, 1, 0));
 
         _audioService = new AudioService(new AudioRegistry());
         _audioService.Mixer.SetMaster(0.8f);
@@ -140,6 +142,7 @@ public sealed class DemoViewModel : INotifyPropertyChanged
         SandboxAddGoldCommand = new RelayCommand(() => ExecuteSandbox("add-gold"));
         SaveCommand = new RelayCommand(SaveSnapshot);
         LoadCommand = new RelayCommand(LoadSnapshot);
+        DemoLogger.Info("demo", "viewmodel-ready");
     }
 
     public ObservableCollection<string> SkillLines { get; } = new();
@@ -245,23 +248,51 @@ public sealed class DemoViewModel : INotifyPropertyChanged
 
     private void TickOnce()
     {
-        _scheduler.Step(TimeSpan.FromSeconds(1), _ => ExecuteAction());
-        UpdateAllDisplays();
+        try
+        {
+            DemoLogger.Info("demo", "tick", new { tick = _tickIndex });
+            _scheduler.Step(TimeSpan.FromSeconds(1), _ => ExecuteAction());
+            UpdateAllDisplays();
+        }
+        catch (Exception ex)
+        {
+            DemoLogger.Error("demo", "tick-failed", ex);
+            throw;
+        }
     }
 
     private void RunOffline(TimeSpan duration)
     {
-        _offlineReconciler.Reconcile(new OfflineReconcileRequest(ProfileId, DateTimeOffset.UtcNow - duration, DateTimeOffset.UtcNow), _ => ExecuteAction(), duration);
-        UpdateAllDisplays();
+        try
+        {
+            DemoLogger.Info("demo", "offline", new { durationSeconds = duration.TotalSeconds });
+            _offlineReconciler.Reconcile(new OfflineReconcileRequest(ProfileId, DateTimeOffset.UtcNow - duration, DateTimeOffset.UtcNow), _ => ExecuteAction(), duration);
+            UpdateAllDisplays();
+        }
+        catch (Exception ex)
+        {
+            DemoLogger.Error("demo", "offline-failed", ex);
+            throw;
+        }
     }
 
     private void ExecuteAction()
     {
-        _tickIndex++;
-        _actionRunner.Step("gather", new ActionContext(ProfileId, DateTimeOffset.UtcNow), TimeSpan.FromSeconds(1));
-        var combatResult = _combatSystem.Step(_combatEncounter);
-        UpdateCombat(combatResult);
-        UpdateScene();
+        try
+        {
+            _tickIndex++;
+            DemoLogger.Info("demo", "execute-action", new { tick = _tickIndex });
+            var actionResult = _actionRunner.Step("gather", new ActionContext(ProfileId, DateTimeOffset.UtcNow), TimeSpan.FromSeconds(1));
+            DemoLogger.Info("demo", "action-result", new { action = "gather", actionResult.Completed, actionResult.Output });
+            var combatResult = _combatSystem.Step(_combatEncounter);
+            UpdateCombat(combatResult);
+            UpdateScene();
+        }
+        catch (Exception ex)
+        {
+            DemoLogger.Error("demo", "execute-action-failed", ex);
+            throw;
+        }
     }
 
     private void UpdateScene()
@@ -296,14 +327,28 @@ public sealed class DemoViewModel : INotifyPropertyChanged
 
     private void UpdateCombat(CombatTickResult result)
     {
+        DemoLogger.Info("demo", "combat-update", new { entries = result.LogEntries.Count, aiDecisions = result.AiDecisions.Count });
         foreach (var entry in result.LogEntries)
         {
             CombatLines.Add($"{entry.AttackerId} hit {entry.DefenderId} for {entry.Damage}");
+        }
+
+        foreach (var decision in result.AiDecisions)
+        {
+            CombatLines.Add($"AI: {decision.AttackerId} -> {decision.TargetId} (seed {decision.Seed?.ToString() ?? "n/a"})");
+        }
+
+        foreach (var combatant in _combatEncounter.Combatants)
+        {
+            var effects = combatant.Effects.Effects.Select(effect => $"{effect.Id}({effect.DurationTicks})");
+            var joined = string.Join(", ", effects);
+            CombatLines.Add($"{combatant.Id} effects: {(string.IsNullOrWhiteSpace(joined) ? "none" : joined)}");
         }
     }
 
     private void UpdateAllDisplays()
     {
+        DemoLogger.Info("demo", "update-displays");
         UpdateSkills();
         UpdateInventory();
         UpdateEquipment();
@@ -323,6 +368,10 @@ public sealed class DemoViewModel : INotifyPropertyChanged
         SkillLines.Clear();
         var progress = _skillSystem.GetOrCreateProgress("gathering");
         SkillLines.Add($"Gathering L{progress.Level} ({progress.TotalXp} XP)");
+        if (progress.Unlocks.Count > 0)
+        {
+            SkillLines.Add($"Unlocks: {string.Join(", ", progress.Unlocks)}");
+        }
     }
 
     private void UpdateInventory()
@@ -456,38 +505,81 @@ public sealed class DemoViewModel : INotifyPropertyChanged
 
     private void SaveSnapshot()
     {
-        var wallet = _walletService.GetOrCreateWallet(ProfileId);
-        var inventory = _inventoryService.GetOrCreate(ProfileId);
-        var state = new DemoState(wallet.GetBalance("gold"), inventory.GetQuantity("log"), _skillSystem.GetOrCreateProgress("gathering").Level);
-        _snapshotService.SaveAsync(ProfileId.ToString(), state, "v1").GetAwaiter().GetResult();
-        SaveStatus = "Saved";
+        try
+        {
+            DemoLogger.Info("demo", "save-snapshot");
+            var wallet = _walletService.GetOrCreateWallet(ProfileId);
+            var inventory = _inventoryService.GetOrCreate(ProfileId);
+            var actionCooldowns = _actionRunner.GetCooldownSnapshot();
+            var combatEffects = _combatEncounter.Combatants
+                .ToDictionary(combatant => combatant.Id, combatant => combatant.Effects.GetSnapshot().ToList());
+            var state = new DemoState(
+                wallet.GetBalance("gold"),
+                inventory.GetQuantity("log"),
+                _skillSystem.GetOrCreateProgress("gathering").Level,
+                actionCooldowns,
+                combatEffects);
+            _snapshotService.SaveAsync(ProfileId.ToString(), state, "v1").GetAwaiter().GetResult();
+            SaveStatus = "Saved";
+        }
+        catch (Exception ex)
+        {
+            DemoLogger.Error("demo", "save-snapshot-failed", ex);
+            throw;
+        }
     }
 
     private void LoadSnapshot()
     {
-        var loaded = _snapshotService.LoadLatestAsync(ProfileId.ToString()).GetAwaiter().GetResult();
-        if (loaded is null)
+        try
         {
-            SaveStatus = "No snapshot";
-            return;
-        }
+            DemoLogger.Info("demo", "load-snapshot");
+            var loaded = _snapshotService.LoadLatestAsync(ProfileId.ToString()).GetAwaiter().GetResult();
+            if (loaded is null)
+            {
+                SaveStatus = "No snapshot";
+                DemoLogger.Warn("demo", "load-snapshot-empty");
+                return;
+            }
 
-        var wallet = _walletService.GetOrCreateWallet(ProfileId);
-        var current = wallet.GetBalance("gold");
-        if (loaded.Gold > current)
+            var wallet = _walletService.GetOrCreateWallet(ProfileId);
+            var current = wallet.GetBalance("gold");
+            if (loaded.Gold > current)
+            {
+                _walletService.Credit(ProfileId, "gold", loaded.Gold - current);
+            }
+
+            var inventory = _inventoryService.GetOrCreate(ProfileId);
+            var logCount = inventory.GetQuantity("log");
+            if (loaded.Logs > logCount)
+            {
+                _inventoryService.AddItem(ProfileId, "log", loaded.Logs - logCount);
+            }
+
+            if (loaded.ActionCooldowns is not null)
+            {
+                _actionRunner.RestoreCooldownSnapshot(loaded.ActionCooldowns);
+            }
+
+            if (loaded.CombatEffects is not null)
+            {
+                foreach (var combatant in _combatEncounter.Combatants)
+                {
+                    if (loaded.CombatEffects.TryGetValue(combatant.Id, out var effects))
+                    {
+                        combatant.Effects.RestoreSnapshot(effects);
+                    }
+                }
+            }
+
+            SaveStatus = "Loaded";
+            UpdateAllDisplays();
+        }
+        catch (Exception ex)
         {
-            _walletService.Credit(ProfileId, "gold", loaded.Gold - current);
+            DemoLogger.Error("demo", "load-snapshot-failed", ex);
+            throw;
         }
-
-        var inventory = _inventoryService.GetOrCreate(ProfileId);
-        var logCount = inventory.GetQuantity("log");
-        if (loaded.Logs > logCount)
-        {
-            _inventoryService.AddItem(ProfileId, "log", loaded.Logs - logCount);
-        }
-
-        SaveStatus = "Loaded";
-        UpdateAllDisplays();
     }
 
     private Guid ProfileId => Guid.Parse("11111111-1111-1111-1111-111111111111");
@@ -495,7 +587,12 @@ public sealed class DemoViewModel : INotifyPropertyChanged
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-    private sealed record DemoState(long Gold, int Logs, int Level);
+    private sealed record DemoState(
+        long Gold,
+        int Logs,
+        int Level,
+        IReadOnlyDictionary<string, ActionCooldownState> ActionCooldowns,
+        IReadOnlyDictionary<string, List<StatusEffect>> CombatEffects);
 
     private sealed class GatherActionHandler : IActionHandler
     {

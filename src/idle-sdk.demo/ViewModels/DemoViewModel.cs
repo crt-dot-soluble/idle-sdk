@@ -14,6 +14,7 @@ using IdleSdk.Core.Crafting;
 using IdleSdk.Core.Input;
 using IdleSdk.Core.Items;
 using IdleSdk.Core.Offline;
+using IdleSdk.Core.Persistence;
 using IdleSdk.Core.Quests;
 using IdleSdk.Core.Scene;
 using IdleSdk.Core.Trade;
@@ -47,6 +48,7 @@ public sealed class DemoViewModel : INotifyPropertyChanged
     private readonly LayeredGenerator _layeredGenerator = new();
     private readonly BestiaryRegistry _bestiaryRegistry = new();
     private readonly ItemCompendiumRegistry _itemCompendiumRegistry = new();
+    private readonly SnapshotService<DemoState> _snapshotService;
     private readonly SceneDiffEngine _sceneDiffEngine = new();
     private readonly SandboxConsole _sandboxConsole = new();
     private readonly AudioService _audioService;
@@ -55,6 +57,7 @@ public sealed class DemoViewModel : INotifyPropertyChanged
     private SceneFrame _currentScene = new();
     private int _tickIndex;
     private string _sandboxStatus = "Disabled";
+    private string _saveStatus = "";
 
     public DemoViewModel()
     {
@@ -117,6 +120,10 @@ public sealed class DemoViewModel : INotifyPropertyChanged
         _audioService = new AudioService(new AudioRegistry());
         _audioService.Mixer.SetMaster(0.8f);
 
+        var snapshotPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "idle-sdk-demo.db");
+        var snapshotStore = new SqliteSnapshotStore($"Data Source={snapshotPath}");
+        _snapshotService = new SnapshotService<DemoState>(snapshotStore, new JsonStateSerializer<DemoState>());
+
         SeedWorld();
         SeedEquipment();
         SeedScene();
@@ -131,6 +138,8 @@ public sealed class DemoViewModel : INotifyPropertyChanged
         OfflineCommand = new RelayCommand(() => RunOffline(TimeSpan.FromSeconds(10)));
         ToggleSandboxCommand = new RelayCommand(ToggleSandbox);
         SandboxAddGoldCommand = new RelayCommand(() => ExecuteSandbox("add-gold"));
+        SaveCommand = new RelayCommand(SaveSnapshot);
+        LoadCommand = new RelayCommand(LoadSnapshot);
     }
 
     public ObservableCollection<string> SkillLines { get; } = new();
@@ -153,6 +162,8 @@ public sealed class DemoViewModel : INotifyPropertyChanged
     public RelayCommand OfflineCommand { get; }
     public RelayCommand ToggleSandboxCommand { get; }
     public RelayCommand SandboxAddGoldCommand { get; }
+    public RelayCommand SaveCommand { get; }
+    public RelayCommand LoadCommand { get; }
 
     public string SandboxStatus
     {
@@ -160,6 +171,16 @@ public sealed class DemoViewModel : INotifyPropertyChanged
         private set
         {
             _sandboxStatus = value;
+            OnPropertyChanged();
+        }
+    }
+
+    public string SaveStatus
+    {
+        get => _saveStatus;
+        private set
+        {
+            _saveStatus = value;
             OnPropertyChanged();
         }
     }
@@ -433,10 +454,48 @@ public sealed class DemoViewModel : INotifyPropertyChanged
         SandboxStatus = _sandboxConsole.Enabled ? "Enabled" : "Disabled";
     }
 
+    private void SaveSnapshot()
+    {
+        var wallet = _walletService.GetOrCreateWallet(ProfileId);
+        var inventory = _inventoryService.GetOrCreate(ProfileId);
+        var state = new DemoState(wallet.GetBalance("gold"), inventory.GetQuantity("log"), _skillSystem.GetOrCreateProgress("gathering").Level);
+        _snapshotService.SaveAsync(ProfileId.ToString(), state, "v1").GetAwaiter().GetResult();
+        SaveStatus = "Saved";
+    }
+
+    private void LoadSnapshot()
+    {
+        var loaded = _snapshotService.LoadLatestAsync(ProfileId.ToString()).GetAwaiter().GetResult();
+        if (loaded is null)
+        {
+            SaveStatus = "No snapshot";
+            return;
+        }
+
+        var wallet = _walletService.GetOrCreateWallet(ProfileId);
+        var current = wallet.GetBalance("gold");
+        if (loaded.Gold > current)
+        {
+            _walletService.Credit(ProfileId, "gold", loaded.Gold - current);
+        }
+
+        var inventory = _inventoryService.GetOrCreate(ProfileId);
+        var logCount = inventory.GetQuantity("log");
+        if (loaded.Logs > logCount)
+        {
+            _inventoryService.AddItem(ProfileId, "log", loaded.Logs - logCount);
+        }
+
+        SaveStatus = "Loaded";
+        UpdateAllDisplays();
+    }
+
     private Guid ProfileId => Guid.Parse("11111111-1111-1111-1111-111111111111");
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+    private sealed record DemoState(long Gold, int Logs, int Level);
 
     private sealed class GatherActionHandler : IActionHandler
     {

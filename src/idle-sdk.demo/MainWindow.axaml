@@ -15,10 +15,14 @@
                     <Button Content="⏲ Offline 10s" Command="{Binding OfflineCommand}" />
                     <Button Content="🧪 Sandbox" Command="{Binding ToggleSandboxCommand}" />
                     <Button Content="💰 Add Gold" Command="{Binding SandboxAddGoldCommand}" />
+                    <Button Content="💾 Save" Command="{Binding SaveCommand}" />
+                    <Button Content="📂 Load" Command="{Binding LoadCommand}" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="6" DockPanel.Dock="Right">
                     <TextBlock Text="Sandbox" VerticalAlignment="Center" />
                     <TextBlock Text="{Binding SandboxStatus}" VerticalAlignment="Center" />
+                    <TextBlock Text=" • " VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding SaveStatus}" VerticalAlignment="Center" />
                 </StackPanel>
             </DockPanel>
         </Border>

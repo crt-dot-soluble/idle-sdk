@@ -9,3 +9,4 @@
 - [DONE] Renderer abstraction selected: WebAssembly (C# → WASM + TS/JS renderer).
 - [DONE] Persistence backend selected: SQLite.
 - [DONE] Plugin packaging selected: NuGet package.
+- [DONE] Web demo milestone: PixiJS UI, inventory slots, popovers, and level-up combo effects.

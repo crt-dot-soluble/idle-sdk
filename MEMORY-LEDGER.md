@@ -44,3 +44,4 @@
 - 2026-01-25: Added standardized demo debug logging with unhandled exception capture for crash investigation.
 - 2026-01-25: Fixed combat AI target selection when no valid targets remain and mirrored demo logs to workspace logs/.
 - 2026-01-25: Generated engine API, schemas, and modding docs; updated README and docs index.
+- 2026-01-27: Delivered PixiJS web demo iteration with PWA cache updates, modernized UI, skill context ring effects, combo burst animations, and compact inventory badges with value popovers and history graph.

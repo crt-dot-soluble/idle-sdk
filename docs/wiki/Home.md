@@ -8,6 +8,11 @@ For the canonical version, use the GitHub wiki.
 - [Governance Overview](Governance-Overview.md)
 - [Components](Components.md)
 - [Workflow](Workflow.md)
+- [Engine Assets](Engine-Assets.md)
+
+## Project Updates
+
+- 2026-01-27: Web demo milestone delivered (PixiJS UI, inventory slots/popovers, and skill combo effects). See README and docs/README.md.
 
 ## Governance Operations
 

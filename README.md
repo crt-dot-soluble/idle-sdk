@@ -42,10 +42,11 @@ Most idle RPG implementations hard‑code rules and content. idle-sdk separates 
 3. Run tests
 
 ### Run Demo
-dotnet run --project src/idle-sdk.demo/IdleSdk.Demo.csproj
+- Avalonia demo: `dotnet run --project src/idle-sdk.demo/IdleSdk.Demo.csproj`
+- Web demo: Open `src/idle-sdk.web/index.html` (PixiJS-based UI with inventory, skills, and debug tools)
 
 ### Test
-dotnet test idle-sdk.sln
+`dotnet test idle-sdk.sln`
 
 ## Content Packs (No‑Code)
 Content packs are JSON‑only bundles:
@@ -53,10 +54,6 @@ Content packs are JSON‑only bundles:
 - data/*.json (actions, skills, items, worlds, quests, etc.)
 
 Packs can be enabled/disabled and hot‑reloaded at runtime. No code changes required.
-
-## Logs
-- Local app logs: %LocalAppData%\idle-sdk-demo\logs\demo.log
-- Workspace mirror: logs\demo.log
 
 ## Usage
 - Use the core systems in src/idle-sdk.core

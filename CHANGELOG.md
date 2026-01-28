@@ -45,3 +45,10 @@
 - Added standardized demo debug logging with unhandled exception capture.
 - Fixed combat AI target selection with no available targets; added workspace log export.
 - Added engine API, schemas, and modding documentation; updated README log locations.
+
+## 0.1.1
+- Added PixiJS web demo with PWA caching, cache-busting, and service worker updates.
+- Modernized web UI with skill context ring, particle effects, wobble/combos, and task renames.
+- Implemented modular inventory slots with stack limits, compact badges, and detailed popovers.
+- Added inventory value breakdowns, history graph, and compact number formatting.
+- Added debug controls for skill level boosts and XP-driven combo effects.

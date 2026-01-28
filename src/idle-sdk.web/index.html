@@ -1,0 +1,277 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>idle-sdk Web Demo</title>
+    <link rel="manifest" href="manifest.webmanifest" />
+    <meta name="theme-color" content="#0f141b" />
+    <link rel="icon" href="icon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="styles.css?v=46" />
+</head>
+
+<body>
+    <div id="app" class="app">
+        <header class="app-header">
+            <div class="brand">
+                <span class="brand-title">idle-sdk Web Demo</span>
+                <span class="dot">•</span>
+                <span id="saveStatus" class="subtle">Ready</span>
+            </div>
+            <div class="header-actions">
+                <button id="openDebug" class="button ghost">🛠 Debug</button>
+            </div>
+        </header>
+
+        <div class="layout">
+            <aside id="leftPanel" class="panel left">
+                <section class="card">
+                    <div class="card-header">
+                        <span>🗺 World</span>
+                    </div>
+                    <ul id="worldList" class="list"></ul>
+                </section>
+
+                <section class="card">
+                    <div class="card-header">
+                        <span>💼 Wallet</span>
+                    </div>
+                    <ul id="walletList" class="list"></ul>
+                </section>
+
+                <section class="card">
+                    <div class="card-header">
+                        <span>📈 Skills</span>
+                    </div>
+                    <ul id="skillsList" class="list"></ul>
+                </section>
+            </aside>
+
+            <div id="splitterVertical" class="splitter vertical"></div>
+
+            <main id="rightPanel" class="panel right">
+                <section id="gameView" class="card">
+                    <div class="card-header">
+                        <span>🎮 Game View</span>
+                        <span class="subtle">PixiJS 2D renderer</span>
+                    </div>
+                    <div class="canvas-shell">
+                        <canvas id="pixiCanvas" class="game-canvas"></canvas>
+                    </div>
+                </section>
+
+                <div id="splitterHorizontal" class="splitter horizontal"></div>
+
+                <section class="card skill-context">
+                    <div class="card-header">
+                        <span>✨ Skill Context</span>
+                    </div>
+                    <div class="skill-grid">
+                        <div class="skill-info">
+                            <div class="skill-icon fancy">
+                                <span class="icon-wobble">
+                                    <img id="skillIconImg" class="skill-icon-image" alt="" />
+                                    <span id="skillIcon" class="skill-icon-emoji">✨</span>
+                                </span>
+                            </div>
+                        </div>
+                        <div class="skill-ring">
+                            <div class="ring-wrap">
+                                <div id="contextRing" class="xp-ring">
+                                    <svg id="contextRingSvg" class="xp-ring-svg" viewBox="0 0 100 100"
+                                        aria-hidden="true">
+                                        <defs>
+                                            <linearGradient id="ringGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                                                <stop offset="0%" stop-color="#f6c8ff" />
+                                                <stop offset="100%" stop-color="#b7f7ff" />
+                                            </linearGradient>
+                                        </defs>
+                                        <circle class="ring-track" cx="50" cy="50" r="38"></circle>
+                                        <circle id="contextRingProgress" class="ring-progress" cx="50" cy="50" r="38"
+                                            stroke="url(#ringGradient)"></circle>
+                                    </svg>
+                                    <div class="ring-inner">
+                                        <div id="skillName" class="ring-title">SKILL</div>
+                                        <div class="ring-level">
+                                            <span class="ring-level-label">LVL</span>
+                                            <span id="skillLevel" class="ring-level-value">1</span>
+                                        </div>
+                                        <div id="skillDetails" class="ring-xp">0 / 0 XP</div>
+                                    </div>
+                                </div>
+                                <span id="contextRingTip" class="ring-tip" aria-hidden="true"></span>
+                                <div id="contextRingParticles" class="ring-particles" aria-hidden="true"></div>
+                            </div>
+                        </div>
+                        <div class="skill-task">
+                            <div class="card-header compact">
+                                <span>Task</span>
+                            </div>
+                            <ul id="taskList" class="list task-list"></ul>
+                            <button id="taskAction" class="button primary">Train</button>
+                            <div id="taskActionHint" class="subtle"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="card tabs">
+                    <div class="tabs-header">
+                        <button class="tab-button active" data-tab="inventory">🎒 Inventory</button>
+                        <button class="tab-button" data-tab="progression">🏁 Progression</button>
+                        <button class="tab-button" data-tab="systems">⚙ Systems</button>
+                        <button class="tab-button" data-tab="content">🧪 Content</button>
+                    </div>
+                    <div class="tabs-content">
+                        <div class="tab-panel active" data-panel="inventory">
+                            <div class="panel-section">
+                                <div class="section-title">📦 Inventory</div>
+                                <ul id="inventoryList" class="list"></ul>
+                            </div>
+                            <div class="panel-section">
+                                <div class="section-title">🛡 Equipment</div>
+                                <ul id="equipmentList" class="list"></ul>
+                            </div>
+                        </div>
+                        <div class="tab-panel" data-panel="progression">
+                            <div class="panel-section">
+                                <div class="section-title">🗒 Quests</div>
+                                <ul id="questList" class="list"></ul>
+                            </div>
+                            <div class="panel-section">
+                                <div class="section-title">🏆 Achievements</div>
+                                <ul id="achievementList" class="list"></ul>
+                            </div>
+                            <div class="panel-section">
+                                <div class="section-title">📚 Collections</div>
+                                <ul id="collectionList" class="list"></ul>
+                            </div>
+                        </div>
+                        <div class="tab-panel" data-panel="systems">
+                            <div class="panel-section">
+                                <div class="section-title">⚔ Combat Log</div>
+                                <ul id="combatList" class="list"></ul>
+                            </div>
+                            <div class="panel-section">
+                                <div class="section-title">🧰 Crafting</div>
+                                <ul id="craftingList" class="list"></ul>
+                            </div>
+                            <div class="panel-section">
+                                <div class="section-title">🪙 Trade</div>
+                                <ul id="tradeList" class="list"></ul>
+                            </div>
+                        </div>
+                        <div class="tab-panel" data-panel="content">
+                            <div class="panel-section">
+                                <div class="section-title">🎲 Layered Generator</div>
+                                <ul id="generatorList" class="list"></ul>
+                            </div>
+                            <div class="panel-section">
+                                <div class="section-title">📖 Compendium</div>
+                                <ul id="compendiumList" class="list"></ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <div id="inventoryPopover" class="inventory-popover hidden" role="dialog" aria-hidden="true">
+        <div class="inventory-popover-card">
+            <div class="inventory-popover-header">
+                <img id="popoverIcon" class="inventory-popover-icon" alt="" />
+                <div>
+                    <div id="popoverName" class="inventory-popover-title">Item</div>
+                    <div id="popoverDesc" class="inventory-popover-desc">Description</div>
+                </div>
+            </div>
+            <div class="inventory-popover-stats">
+                <div id="popoverStack" class="inventory-popover-stat inventory-popover-stack">Stack 0 / 0</div>
+                <div id="popoverValue" class="inventory-popover-stat inventory-popover-values">
+                    <img src="assets/icons/cash_dark.png" alt="Cash" class="inventory-popover-cash" />
+                    0
+                </div>
+            </div>
+            <div class="inventory-popover-graph">
+                <canvas id="popoverGraph" width="220" height="60"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div id="debugOverlay" class="overlay hidden" role="dialog" aria-modal="true">
+        <div class="overlay-panel">
+            <div class="overlay-header">
+                <div>
+                    <div class="overlay-title">Debug Console</div>
+                    <div class="subtle">Diagnostics • Controls • Content Explorer</div>
+                </div>
+                <button id="closeDebug" class="button ghost">✕</button>
+            </div>
+            <div class="overlay-tabs">
+                <button class="tab-button active" data-tab="debug">🛠 Debug</button>
+                <button class="tab-button" data-tab="content">📦 Content</button>
+            </div>
+            <div class="overlay-body">
+                <div class="tab-panel active" data-panel="debug">
+                    <div class="panel-section">
+                        <div class="section-title">Runtime</div>
+                        <div id="debugTickRate" class="subtle">Tick rate: --</div>
+                        <div id="debugFps" class="subtle">FPS: --</div>
+                        <div id="debugUiUpdates" class="subtle">UI updates/frame: --</div>
+                        <div id="debugOnline" class="subtle">Online</div>
+                        <div id="debugOffline" class="subtle">Last offline: n/a</div>
+                    </div>
+                    <div class="panel-section">
+                        <div class="section-title">Controls</div>
+                        <div class="button-row">
+                            <button id="tickBtn" class="button primary">⏱ Tick</button>
+                            <button id="offlineBtn" class="button">⏲ Offline 10s</button>
+                            <button id="addGoldBtn" class="button">💰 Add Gold</button>
+                            <button id="saveBtn" class="button">💾 Save</button>
+                            <button id="loadBtn" class="button">📂 Load</button>
+                        </div>
+                        <div class="button-row">
+                            <button id="toggleSandbox" class="button ghost">🧪 Sandbox</button>
+                            <button id="toggleLock" class="button ghost">🔓 Lock</button>
+                        </div>
+                        <div class="section-title">Skill Boosts</div>
+                        <div class="button-row">
+                            <button class="button" data-level-boost="1">+1 Level</button>
+                            <button class="button" data-level-boost="5">+5 Levels</button>
+                            <button class="button" data-level-boost="10">+10 Levels</button>
+                        </div>
+                        <div class="button-row">
+                            <input id="levelBoostInput" class="text-input" type="number" min="1" placeholder="Custom levels" />
+                            <button id="levelBoostApply" class="button primary">Apply</button>
+                        </div>
+                        <div class="zoom-row">
+                            <label for="zoomSlider" class="subtle">Zoom</label>
+                            <input id="zoomSlider" type="range" min="0.75" max="1.5" step="0.01" value="1" />
+                            <span id="zoomValue" class="subtle">100%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-panel" data-panel="content">
+                    <div class="panel-section">
+                        <div class="section-title">Wallet</div>
+                        <div id="walletInspector" class="inspector"></div>
+                    </div>
+                    <div class="panel-section">
+                        <div class="section-title">Inventory</div>
+                        <div id="inventoryInspector" class="inspector"></div>
+                    </div>
+                    <div class="panel-section">
+                        <div class="section-title">Skills</div>
+                        <div id="skillInspector" class="inspector"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/pixi.js@8.2.3/dist/pixi.min.js"></script>
+    <script src="app.js?v=46" type="module"></script>
+</body>
+
+</html>

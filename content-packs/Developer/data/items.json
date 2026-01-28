@@ -1,0 +1,42 @@
+[
+    {
+        "id": "moment",
+        "name": "Moment",
+        "stackable": true
+    },
+    {
+        "id": "oak-log",
+        "name": "Oak Log",
+        "stackable": true
+    },
+    {
+        "id": "willow-log",
+        "name": "Willow Log",
+        "stackable": true
+    },
+    {
+        "id": "maple-log",
+        "name": "Maple Log",
+        "stackable": true
+    },
+    {
+        "id": "yew-log",
+        "name": "Yew Log",
+        "stackable": true
+    },
+    {
+        "id": "magic-log",
+        "name": "Magic Log",
+        "stackable": true
+    },
+    {
+        "id": "sword",
+        "name": "Sword",
+        "stackable": false
+    },
+    {
+        "id": "shield",
+        "name": "Shield",
+        "stackable": false
+    }
+]

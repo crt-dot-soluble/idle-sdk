@@ -1,0 +1,11 @@
+[
+    {
+        "id": "plank",
+        "name": "Plank",
+        "inputs": {
+            "oak-log": 2
+        },
+        "outputItemId": "oak-log",
+        "outputQuantity": 1
+    }
+]

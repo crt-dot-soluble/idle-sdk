@@ -1,0 +1,9 @@
+[
+    {
+        "id": "icon-idling",
+        "path": "assets/icons/afk.png",
+        "type": "png",
+        "renderWidth": 64,
+        "renderHeight": 64
+    }
+]

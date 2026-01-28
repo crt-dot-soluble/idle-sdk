@@ -43,10 +43,11 @@ public static class DataPackSchemas
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["id", "name", "maxLevel"],
+        "required": ["id", "name", "icon", "maxLevel"],
         "properties": {
           "id": { "type": "string" },
           "name": { "type": "string" },
+          "icon": { "type": "string", "minLength": 1 },
           "maxLevel": { "type": "integer", "minimum": 1 },
           "unlocks": {
             "type": "object",
@@ -85,6 +86,57 @@ public static class DataPackSchemas
           "id": { "type": "string" },
           "strategy": { "type": "string" },
           "parameters": { "type": "object" }
+        }
+      }
+    }
+    """;
+
+    public const string ImageAssetSchema = """
+    {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "path", "type"],
+        "properties": {
+          "id": { "type": "string" },
+          "path": { "type": "string" },
+          "type": { "type": "string", "enum": ["png", "jpg", "jpeg", "unknown"] },
+          "renderWidth": { "type": "integer", "minimum": 1 },
+          "renderHeight": { "type": "integer", "minimum": 1 }
+        }
+      }
+    }
+    """;
+
+    public const string SpriteSheetSchema = """
+    {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "imageId", "frameWidth", "frameHeight", "columns", "rows"],
+        "properties": {
+          "id": { "type": "string" },
+          "imageId": { "type": "string" },
+          "frameWidth": { "type": "integer", "minimum": 1 },
+          "frameHeight": { "type": "integer", "minimum": 1 },
+          "columns": { "type": "integer", "minimum": 1 },
+          "rows": { "type": "integer", "minimum": 1 },
+          "frames": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["id", "x", "y", "width", "height"],
+              "properties": {
+                "id": { "type": "string" },
+                "x": { "type": "integer", "minimum": 0 },
+                "y": { "type": "integer", "minimum": 0 },
+                "width": { "type": "integer", "minimum": 1 },
+                "height": { "type": "integer", "minimum": 1 }
+              }
+            }
+          }
         }
       }
     }

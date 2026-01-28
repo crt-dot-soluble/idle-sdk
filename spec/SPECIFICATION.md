@@ -30,6 +30,7 @@
        - Content packs are JSON-based and validated against schemas.
        - Packs are sandboxed (no code execution) and can be dynamically toggled at runtime.
        - Pack changes are surfaced as deterministic reload events.
+      - FR-12: Provide a core asset registry for image assets and sprite sheets (PNG/JPG) with frame indexing for renderers.
 - Non-functional requirements:
    - NFR-1 (performance): Simulation must sustain at least 60 ticks/second for baseline content on a mid-tier desktop CPU.
    - NFR-2 (security): No arbitrary code execution from data packs; plugin loading must be explicit and versioned.
@@ -42,7 +43,7 @@
 - Inputs (schemas, validation rules):
    - Module manifests: name, version, dependencies, entry points, schema versions.
    - Content packs: pack manifest, module list, data catalog, schema versions, dependencies, and enable/disable flags.
-   - Data packs: actions, skills, items, worlds, enemies, loot tables, layers, UI panel descriptors, action modifiers, status effects, combat AI profiles, quests, achievements, collections, audio, trade, crafting, and compendium entries.
+   - Data packs: actions, skills, items, worlds, enemies, loot tables, layers, UI panel descriptors, action modifiers, status effects, combat AI profiles, quests, achievements, collections, audio, trade, crafting, compendium entries, images, and sprite sheets.
    - Runtime configuration: tick rate, offline reconciliation limits, logging level, sandbox permissions.
 - Outputs (schemas, guarantees):
    - Simulation state snapshots (versioned, deterministic, diffable).
@@ -60,6 +61,7 @@
    - Module system (`ModuleRegistry`, `ModuleLoader`)
    - Data layer (`SchemaValidator`, `DataPackLoader`, `ContentPackRegistry`, `ContentPackManager`)
    - Gameplay systems (Actions, Skills, Combat, World, Economy, Items)
+   - Assets (`AssetRegistry`, `ImageAssetDefinition`, `SpriteSheetDefinition`)
    - Scene interface (`SceneAdapter`, `SceneLayerModel`)
    - Persistence (`SnapshotStore`, `StateSerializer`)
    - Sandbox (`SandboxConsole`, `RuntimeInspector`)
@@ -87,7 +89,7 @@
    - Packs must be loadable without code and hot-reloadable at runtime.
    - Enable/disable toggles must be reversible without application restart.
 - Data models:
-   - Accounts, Profiles, Wallets, Inventories, Worlds, Nodes, Items, Actions, Skills, Skill Unlocks, Combat Encounters, Status Effects, Combat AI Profiles, Achievements, Content Pack Manifests.
+   - Accounts, Profiles, Wallets, Inventories, Worlds, Nodes, Items, Actions, Skills, Skill Unlocks, Combat Encounters, Status Effects, Combat AI Profiles, Achievements, Content Pack Manifests, Image Assets, Sprite Sheets, Sprite Frames.
 - Persistence requirements:
    - Snapshot-based saves with versioned schema.
    - Deterministic replay input log for validation and debugging.

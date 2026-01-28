@@ -47,6 +47,12 @@ This document summarizes the public API surface to help developers extend the en
 - ContentPackManager: load/validate/hot-reload packs
 - ContentPackRegistry: enable/disable + snapshots
 
+## Assets
+- ImageAssetDefinition: image metadata (id/path/type)
+- SpriteSheetDefinition: sheet layout + frames
+- SpriteFrameDefinition: frame rectangle
+- AssetRegistry: image + sprite sheet registry
+
 ## Persistence
 - ISnapshotStore: storage interface
 - SqliteSnapshotStore: SQLite implementation

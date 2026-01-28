@@ -10,6 +10,8 @@
 - Engine API overview: docs/ENGINE-API.md
 - JSON schemas: docs/SCHEMAS.md
 - Modding guide: docs/MODDING.md
+- Assets & sprites: docs/ENGINE-API.md
+- Generated API docs: docs/GENERATED-API.md
 
 ## Contributing Docs
 Documentation updates should align with governance requirements and keep the wiki mirror in sync.

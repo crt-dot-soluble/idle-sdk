@@ -1,0 +1,8 @@
+[
+    {
+        "id": "woodcut",
+        "name": "Chop Logs",
+        "description": "Collect 5 logs",
+        "targetValue": 5
+    }
+]

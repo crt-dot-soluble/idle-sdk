@@ -1,0 +1,14 @@
+[
+    {
+        "itemId": "sword",
+        "slot": "Weapon",
+        "attackBonus": 3,
+        "defenseBonus": 0
+    },
+    {
+        "itemId": "shield",
+        "slot": "Offhand",
+        "attackBonus": 0,
+        "defenseBonus": 2
+    }
+]

@@ -10,7 +10,7 @@ public class PhaseBIntegrationTests
     public void Action_Cooldown_Skill_Unlock_Combat_Effect_Integration()
     {
         var skillRegistry = new SkillRegistry();
-        skillRegistry.Register(new SkillDefinition("gathering", "Gathering", 5, new Dictionary<int, string>
+        skillRegistry.Register(new SkillDefinition("gathering", "Gathering", "🪓", 5, new Dictionary<int, string>
         {
             [2] = "Unlocked: Swift Gather"
         }));

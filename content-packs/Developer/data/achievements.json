@@ -1,0 +1,8 @@
+[
+    {
+        "id": "wealth",
+        "name": "Wealth",
+        "description": "Earn 10 gold",
+        "targetValue": 10
+    }
+]

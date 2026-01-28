@@ -1,0 +1,28 @@
+[
+    {
+        "id": "idling",
+        "name": "Idling",
+        "icon": "icon-idling",
+        "maxLevel": 20,
+        "unlocks": {
+            "1": "Idle",
+            "5": "Flip a coin",
+            "10": "Daydream",
+            "15": "Power nap",
+            "20": "Lucid drift"
+        }
+    },
+    {
+        "id": "woodcutting",
+        "name": "Woodcutting",
+        "icon": "🪓",
+        "maxLevel": 20,
+        "unlocks": {
+            "1": "Oak",
+            "5": "Willow",
+            "10": "Maple",
+            "15": "Yew",
+            "20": "Magic"
+        }
+    }
+]

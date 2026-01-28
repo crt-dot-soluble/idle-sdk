@@ -1,10 +1,117 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="IdleSdk.Demo.App"
-             RequestedThemeVariant="Default">
+             RequestedThemeVariant="Dark">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.Styles>
         <FluentTheme />
+
+        <Style Selector="Window">
+            <Setter Property="Background" Value="#0f1116" />
+            <Setter Property="FontFamily" Value="Segoe UI, Inter, Arial" />
+            <Setter Property="Foreground" Value="#e5e7eb" />
+            <Setter Property="FontSize" Value="13.5" />
+        </Style>
+
+        <Style Selector="TextBlock.section-header">
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="FontSize" Value="15" />
+            <Setter Property="Foreground" Value="#f3f4f6" />
+        </Style>
+
+        <Style Selector="TextBlock.subtle">
+            <Setter Property="FontSize" Value="12.5" />
+            <Setter Property="Foreground" Value="#9aa4b2" />
+        </Style>
+
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="#151a22" />
+            <Setter Property="BorderBrush" Value="#262c36" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="12" />
+            <Setter Property="BoxShadow" Value="0 6 18 #00000066" />
+        </Style>
+
+        <Style Selector="Border.card.active">
+            <Setter Property="BorderBrush" Value="#22c55e" />
+            <Setter Property="BorderThickness" Value="2" />
+        </Style>
+
+        <Style Selector="Button">
+            <Setter Property="Padding" Value="14,7" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Background" Value="#2a3441" />
+            <Setter Property="BorderBrush" Value="#3b4757" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+        <Style Selector="WrapPanel > Button">
+            <Setter Property="Margin" Value="0,0,10,10" />
+        </Style>
+
+        <Style Selector="WrapPanel > ToggleButton">
+            <Setter Property="Margin" Value="0,0,10,10" />
+        </Style>
+
+        <Style Selector="Button:pointerover">
+            <Setter Property="Background" Value="#334055" />
+        </Style>
+
+        <Style Selector="Button:pressed">
+            <Setter Property="Background" Value="#263247" />
+        </Style>
+
+        <Style Selector="Button.accent">
+            <Setter Property="Background" Value="#3b82f6" />
+            <Setter Property="BorderBrush" Value="#3b82f6" />
+            <Setter Property="Foreground" Value="#ffffff" />
+        </Style>
+
+        <Style Selector="ToggleButton">
+            <Setter Property="Padding" Value="14,7" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Background" Value="#2a3441" />
+            <Setter Property="BorderBrush" Value="#3b4757" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+
+        <Style Selector="ToggleButton:pointerover">
+            <Setter Property="Background" Value="#334055" />
+        </Style>
+
+        <Style Selector="ToggleButton:checked">
+            <Setter Property="Background" Value="#22c55e" />
+            <Setter Property="BorderBrush" Value="#22c55e" />
+            <Setter Property="Foreground" Value="#0b1f10" />
+        </Style>
+
+        <Style Selector="ListBox">
+            <Setter Property="Background" Value="#0f141b" />
+            <Setter Property="BorderBrush" Value="#27303b" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Padding" Value="6" />
+        </Style>
+
+        <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="6,4" />
+            <Setter Property="Margin" Value="0,0,0,4" />
+            <Setter Property="CornerRadius" Value="4" />
+            <Setter Property="MinHeight" Value="68" />
+        </Style>
+
+        <Style Selector="ListBoxItem:selected">
+            <Setter Property="Background" Value="#2c3e55" />
+        </Style>
+
+        <Style Selector="TabControl">
+            <Setter Property="Background" Value="#121720" />
+        </Style>
+
+        <Style Selector="TabItem">
+            <Setter Property="Padding" Value="12,8" />
+        </Style>
     </Application.Styles>
 </Application>

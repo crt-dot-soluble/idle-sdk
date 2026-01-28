@@ -16,7 +16,7 @@ This document lists the supported content pack JSON schemas in the engine.
 ## Skills
 - Source: DataPackSchemas.SkillDataSchema
 - File: data/skills.json
-- Fields: id, name, maxLevel, unlocks (level->string)
+- Fields: id, name, icon, maxLevel, unlocks (level->string)
 
 ## Status Effects
 - Source: DataPackSchemas.StatusEffectSchema
@@ -27,6 +27,16 @@ This document lists the supported content pack JSON schemas in the engine.
 - Source: DataPackSchemas.CombatAiSchema
 - File: data/combat-ai.json
 - Fields: id, strategy, parameters
+
+## Images
+- Source: DataPackSchemas.ImageAssetSchema
+- File: data/images.json
+- Fields: id, path, type (png/jpg/jpeg/unknown), renderWidth?, renderHeight?
+
+## Sprite Sheets
+- Source: DataPackSchemas.SpriteSheetSchema
+- File: data/sprite-sheets.json
+- Fields: id, imageId, frameWidth, frameHeight, columns, rows, frames[]
 
 ## Validation Rules
 - Each JSON file is validated independently.

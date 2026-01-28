@@ -1,0 +1,41 @@
+{
+    "bestiary": [
+        {
+            "id": "slime",
+            "name": "Slime",
+            "description": "A weak creature"
+        }
+    ],
+    "items": [
+        {
+            "id": "moment",
+            "name": "Moment",
+            "description": "A fleeting spark"
+        },
+        {
+            "id": "oak-log",
+            "name": "Oak Log",
+            "description": "Basic wood"
+        },
+        {
+            "id": "willow-log",
+            "name": "Willow Log",
+            "description": "Lightweight wood"
+        },
+        {
+            "id": "maple-log",
+            "name": "Maple Log",
+            "description": "Resilient wood"
+        },
+        {
+            "id": "yew-log",
+            "name": "Yew Log",
+            "description": "Dense wood"
+        },
+        {
+            "id": "magic-log",
+            "name": "Magic Log",
+            "description": "Rare wood"
+        }
+    ]
+}

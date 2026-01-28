@@ -1,0 +1,20 @@
+[
+    {
+        "id": "idle",
+        "name": "Idle",
+        "duration": 1,
+        "cooldown": 0,
+        "tags": [
+            "idle"
+        ]
+    },
+    {
+        "id": "woodcut",
+        "name": "Woodcut",
+        "duration": 1,
+        "cooldown": 0,
+        "tags": [
+            "woodcutting"
+        ]
+    }
+]

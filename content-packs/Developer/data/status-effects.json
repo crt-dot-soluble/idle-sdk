@@ -1,0 +1,8 @@
+[
+    {
+        "id": "battle-focus",
+        "durationTicks": 3,
+        "attackDelta": 1,
+        "defenseDelta": 0
+    }
+]

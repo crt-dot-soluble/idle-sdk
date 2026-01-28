@@ -1,0 +1,30 @@
+[
+    {
+        "id": "u1",
+        "name": "Prime",
+        "worlds": [
+            {
+                "id": "w1",
+                "name": "Idle Realm",
+                "regions": [
+                    {
+                        "id": "r1",
+                        "name": "Northlands",
+                        "zones": [
+                            {
+                                "id": "z1",
+                                "name": "Forest",
+                                "nodes": [
+                                    {
+                                        "id": "n1",
+                                        "name": "Clearing"
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

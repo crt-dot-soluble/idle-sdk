@@ -1,0 +1,9 @@
+[
+    {
+        "id": "simple",
+        "strategy": "focus-low-health",
+        "parameters": {
+            "threshold": 0.3
+        }
+    }
+]

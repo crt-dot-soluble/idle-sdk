@@ -3,109 +3,298 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:vm="clr-namespace:IdleSdk.Demo.ViewModels"
+    xmlns:conv="clr-namespace:IdleSdk.Demo.Converters"
     mc:Ignorable="d" d:DesignWidth="1200" d:DesignHeight="700"
     x:Class="IdleSdk.Demo.MainWindow"
     x:DataType="vm:DemoViewModel"
-    Title="idle-sdk Demo">
-    <Grid RowDefinitions="Auto,*" ColumnDefinitions="280,*" Margin="12" RowSpacing="12" ColumnSpacing="12">
-        <Border Grid.Row="0" Grid.ColumnSpan="2" Padding="8" Background="#20252b" CornerRadius="6">
-            <DockPanel LastChildFill="False" Margin="4,0">
-                <StackPanel Orientation="Horizontal" Spacing="8" DockPanel.Dock="Left">
-                    <Button Content="⏱ Tick" Command="{Binding TickCommand}" />
-                    <Button Content="⏲ Offline 10s" Command="{Binding OfflineCommand}" />
-                    <Button Content="🧪 Sandbox" Command="{Binding ToggleSandboxCommand}" />
-                    <Button Content="💰 Add Gold" Command="{Binding SandboxAddGoldCommand}" />
-                    <Button Content="💾 Save" Command="{Binding SaveCommand}" />
-                    <Button Content="📂 Load" Command="{Binding LoadCommand}" />
+    Title="idle-sdk Demo"
+    MinWidth="1100"
+    MinHeight="700">
+    <Window.Resources>
+        <conv:OneThirdWidthConverter x:Key="OneThirdWidthConverter" />
+    </Window.Resources>
+    <Grid RowDefinitions="Auto,*" ColumnDefinitions="320,8,*" Margin="16" RowSpacing="16" ColumnSpacing="0" RenderTransformOrigin="0,0">
+        <Grid.RenderTransform>
+            <ScaleTransform ScaleX="{Binding ZoomLevel}" ScaleY="{Binding ZoomLevel}" />
+        </Grid.RenderTransform>
+        <Border Grid.Row="0" Grid.ColumnSpan="3" Classes="card" Padding="12">
+            <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="idle-sdk Demo" FontSize="16" FontWeight="SemiBold" />
+                    <TextBlock Text="•" Classes="subtle" />
+                    <TextBlock Text="{Binding SaveStatus}" Classes="subtle" />
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="6" DockPanel.Dock="Right">
-                    <TextBlock Text="Sandbox" VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding SandboxStatus}" VerticalAlignment="Center" />
-                    <TextBlock Text=" • " VerticalAlignment="Center" />
-                    <TextBlock Text="{Binding SaveStatus}" VerticalAlignment="Center" />
-                </StackPanel>
-            </DockPanel>
+                <Button Grid.Column="1" Content="🛠 Debug" Command="{Binding ToggleDebugOverlayCommand}" />
+            </Grid>
         </Border>
 
-        <StackPanel Grid.Row="1" Grid.Column="0" Spacing="10">
-            <Border Background="#1b1f24" CornerRadius="6" Padding="10">
-                <StackPanel Spacing="6">
-                    <TextBlock Text="🗺 World" FontWeight="Bold" />
-                    <ListBox ItemsSource="{Binding WorldLines}" Height="140" />
-                </StackPanel>
-            </Border>
+        <ScrollViewer Grid.Row="1" Grid.Column="0" MinWidth="220" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Spacing="12">
+                <Border Classes="card">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="🗺 World" Classes="section-header" />
+                        <ListBox ItemsSource="{Binding WorldLines}" Height="160" />
+                    </StackPanel>
+                </Border>
 
-            <Border Background="#1b1f24" CornerRadius="6" Padding="10">
-                <StackPanel Spacing="6">
-                    <TextBlock Text="📈 Skills" FontWeight="Bold" />
-                    <ListBox ItemsSource="{Binding SkillLines}" Height="100" />
-                </StackPanel>
-            </Border>
-        </StackPanel>
+                <Border Classes="card">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="💼 Wallet" Classes="section-header" />
+                        <ListBox ItemsSource="{Binding WalletLines}" Height="70" />
+                    </StackPanel>
+                </Border>
 
-        <Grid Grid.Row="1" Grid.Column="1" RowDefinitions="Auto,*" RowSpacing="10">
-            <Border Background="#1b1f24" CornerRadius="6" Padding="10">
-                <StackPanel Spacing="6">
-                    <TextBlock Text="🎮 Game View (placeholder)" FontWeight="Bold" />
-                    <Border Height="220" Background="#2a3037" CornerRadius="4" Padding="8">
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="🧩 Scene Elements" FontWeight="Bold" />
-                            <ListBox ItemsSource="{Binding SceneLines}" Height="160" />
-                        </StackPanel>
+                <Border Classes="card">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="📈 Skills" Classes="section-header" />
+                        <ListBox ItemsSource="{Binding Skills}" SelectedItem="{Binding SelectedSkill}" Height="170">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="●" Foreground="#22c55e" IsVisible="{Binding IsActiveSkill}" />
+                                        <Image Source="{Binding IconImage}" Width="{Binding IconWidth}" Height="{Binding IconHeight}" MinWidth="64" MinHeight="64" Stretch="Uniform" RenderOptions.BitmapInterpolationMode="None" IsVisible="{Binding HasIconImage}" />
+                                        <TextBlock Text="{Binding Icon}" FontSize="16" IsVisible="{Binding HasEmojiIcon}" />
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Name}" FontWeight="SemiBold" FontSize="14" />
+                                            <TextBlock Text="{Binding LevelText}" Classes="subtle" FontSize="13.5" FontWeight="SemiBold" />
+                                            <ProgressBar Minimum="0" Maximum="1" Value="{Binding ProgressRatio}" Height="4" Width="140" IsVisible="{Binding IsActiveSkill}" />
+                                        </StackPanel>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+
+        <GridSplitter Grid.Row="1" Grid.Column="1" Width="8" Background="#1f2937" ResizeDirection="Columns" />
+
+        <Grid Grid.Row="1" Grid.Column="2" MinWidth="420" RowDefinitions="Auto,6,Auto,6,*" RowSpacing="12" Margin="16,0,0,0">
+            <Border Classes="card">
+                <StackPanel Spacing="10">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="🎮 Game View" Classes="section-header" />
+                        <TextBlock Text="Placeholder scene for renderer integration" Classes="subtle" />
+                    </StackPanel>
+                    <Border Background="#0f141b" CornerRadius="8" Padding="10" BorderBrush="#26303b" BorderThickness="1">
+                        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                            <Border Grid.Column="0" Background="#111824" CornerRadius="6" Padding="8" BorderBrush="#26303b" BorderThickness="1">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="🧩 Scene Elements" Classes="section-header" />
+                                    <ListBox ItemsSource="{Binding SceneLines}" Height="170" />
+                                </StackPanel>
+                            </Border>
+                            <Border Grid.Column="1" Background="#111824" CornerRadius="6" Padding="8" BorderBrush="#26303b" BorderThickness="1">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="🔍 Scene Diff" Classes="section-header" />
+                                    <ListBox ItemsSource="{Binding SceneDiffLines}" Height="170" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
                     </Border>
-                        <Expander Header="🔍 Scene Diff" IsExpanded="False">
-                        <ListBox ItemsSource="{Binding SceneDiffLines}" Height="100" />
-                    </Expander>
                 </StackPanel>
             </Border>
 
-            <TabControl Grid.Row="1">
-                <TabItem Header="🎒 Inventory">
-                    <StackPanel Margin="8" Spacing="8">
-                        <TextBlock Text="💼 Wallet" FontWeight="Bold" />
-                        <ListBox ItemsSource="{Binding WalletLines}" Height="60" />
+            <GridSplitter Grid.Row="1" Height="6" Background="#1f2937" ResizeDirection="Rows" />
 
-                        <TextBlock Text="📦 Inventory" FontWeight="Bold" />
-                        <ListBox ItemsSource="{Binding InventoryLines}" Height="140" />
+            <Border Grid.Row="2" Classes="card {Binding SelectedSkillActiveClass}">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="✨ Skill Context" Classes="section-header" />
+                    <Grid ColumnDefinitions="*,*" ColumnSpacing="16" IsVisible="{Binding HasSelectedSkill}">
+                        <StackPanel Spacing="10">
+                            <StackPanel Orientation="Horizontal" Spacing="10">
+                                <Image Source="{Binding SelectedSkillIconImage}" Width="{Binding SelectedSkillIconWidth}" Height="{Binding SelectedSkillIconHeight}" MinWidth="64" MinHeight="64" Stretch="Uniform" RenderOptions.BitmapInterpolationMode="None" IsVisible="{Binding SelectedSkillHasIconImage}" />
+                                <TextBlock Text="{Binding SelectedSkillIcon}" FontSize="32" IsVisible="{Binding SelectedSkillHasEmojiIcon}" />
+                                <StackPanel>
+                                    <TextBlock Text="{Binding SelectedSkillName}" FontWeight="SemiBold" FontSize="16" />
+                                    <TextBlock Text="{Binding SelectedSkillDetails}" Classes="subtle" FontSize="12.5" />
+                                </StackPanel>
+                            </StackPanel>
 
-                        <TextBlock Text="🛡 Equipment" FontWeight="Bold" />
-                        <ListBox ItemsSource="{Binding EquipmentLines}" Height="120" />
-                    </StackPanel>
-                </TabItem>
-                <TabItem Header="🏁 Progression">
-                    <StackPanel Margin="8" Spacing="8">
-                        <TextBlock Text="🗒 Quests" FontWeight="Bold" />
-                        <ListBox ItemsSource="{Binding QuestLines}" Height="80" />
+                        </StackPanel>
 
-                        <TextBlock Text="🏆 Achievements" FontWeight="Bold" />
-                        <ListBox ItemsSource="{Binding AchievementLines}" Height="80" />
+                        <StackPanel Grid.Column="1" Spacing="8">
+                            <TextBlock Text="{Binding SelectedSkillTaskHeader}" Classes="section-header" />
+                            <ListBox ItemsSource="{Binding SelectedSkillTasks}" SelectedItem="{Binding SelectedSkillTask}" Height="180">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" Spacing="8">
+                                            <TextBlock Text="🔒" Classes="subtle" IsVisible="{Binding IsLocked}" />
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding Detail}" Classes="subtle" />
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                            <Button Content="{Binding SelectedSkillActionLabel}" Command="{Binding SkillActionCommand}" IsEnabled="{Binding SelectedSkillActionEnabled}" />
+                            <TextBlock Text="{Binding SelectedSkillActionHint}" Classes="subtle" />
+                        </StackPanel>
+                    </Grid>
 
-                        <TextBlock Text="📚 Collections" FontWeight="Bold" />
-                        <ListBox ItemsSource="{Binding CollectionLines}" Height="80" />
-                    </StackPanel>
-                </TabItem>
-                <TabItem Header="⚙ Systems">
-                    <StackPanel Margin="8" Spacing="8">
-                        <TextBlock Text="⚔ Combat Log" FontWeight="Bold" />
-                        <ListBox ItemsSource="{Binding CombatLines}" Height="120" />
+                    <TextBlock Text="Select a skill to view its options." Classes="subtle" IsVisible="{Binding NoSelectedSkill}" />
+                </StackPanel>
+            </Border>
 
-                        <TextBlock Text="🧰 Crafting" FontWeight="Bold" />
-                        <ListBox ItemsSource="{Binding CraftingLines}" Height="80" />
+            <GridSplitter Grid.Row="3" Height="6" Background="#1f2937" ResizeDirection="Rows" />
 
-                        <TextBlock Text="🪙 Trade" FontWeight="Bold" />
-                        <ListBox ItemsSource="{Binding TradeLines}" Height="80" />
-                    </StackPanel>
-                </TabItem>
-                <TabItem Header="🧪 Content">
-                    <StackPanel Margin="8" Spacing="8">
-                        <TextBlock Text="🎲 Layered Generator" FontWeight="Bold" />
-                        <ListBox ItemsSource="{Binding GeneratorLines}" Height="80" />
+            <Border Grid.Row="4" Classes="card">
+                <TabControl>
+                    <TabItem Header="🎒 Inventory">
+                        <ScrollViewer Margin="8" VerticalScrollBarVisibility="Auto">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="📦 Inventory" Classes="section-header" />
+                                <ListBox ItemsSource="{Binding InventoryLines}" Height="160" />
 
-                        <TextBlock Text="📖 Compendium" FontWeight="Bold" />
-                        <ListBox ItemsSource="{Binding CompendiumLines}" Height="120" />
-                    </StackPanel>
-                </TabItem>
-            </TabControl>
+                                <TextBlock Text="🛡 Equipment" Classes="section-header" />
+                                <ListBox ItemsSource="{Binding EquipmentLines}" Height="140" />
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+                    <TabItem Header="🏁 Progression">
+                        <ScrollViewer Margin="8" VerticalScrollBarVisibility="Auto">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="🗒 Quests" Classes="section-header" />
+                                <ListBox ItemsSource="{Binding QuestLines}" Height="90" />
+
+                                <TextBlock Text="🏆 Achievements" Classes="section-header" />
+                                <ListBox ItemsSource="{Binding AchievementLines}" Height="90" />
+
+                                <TextBlock Text="📚 Collections" Classes="section-header" />
+                                <ListBox ItemsSource="{Binding CollectionLines}" Height="90" />
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+                    <TabItem Header="⚙ Systems">
+                        <ScrollViewer Margin="8" VerticalScrollBarVisibility="Auto">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="⚔ Combat Log" Classes="section-header" />
+                                <ListBox ItemsSource="{Binding CombatLines}" Height="140" />
+
+                                <TextBlock Text="🧰 Crafting" Classes="section-header" />
+                                <ListBox ItemsSource="{Binding CraftingLines}" Height="90" />
+
+                                <TextBlock Text="🪙 Trade" Classes="section-header" />
+                                <ListBox ItemsSource="{Binding TradeLines}" Height="90" />
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+                    <TabItem Header="🧪 Content">
+                        <ScrollViewer Margin="8" VerticalScrollBarVisibility="Auto">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="🎲 Layered Generator" Classes="section-header" />
+                                <ListBox ItemsSource="{Binding GeneratorLines}" Height="90" />
+
+                                <TextBlock Text="📖 Compendium" Classes="section-header" />
+                                <ListBox ItemsSource="{Binding CompendiumLines}" Height="140" />
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+                </TabControl>
+            </Border>
         </Grid>
+
+        <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="3" Background="#00000088" IsVisible="{Binding IsDebugOverlayOpen}" />
+        <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="0" Grid.ColumnSpan="3" Classes="card" Background="#0f141b" BorderBrush="#26303b" BorderThickness="1" CornerRadius="12"
+                HorizontalAlignment="Right" VerticalAlignment="Stretch" Margin="16" Padding="16" IsVisible="{Binding IsDebugOverlayOpen}"
+                Width="{Binding Bounds.Width, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource OneThirdWidthConverter}}">
+            <Grid RowDefinitions="Auto,*" RowSpacing="12">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="Debug Console" FontSize="16" FontWeight="SemiBold" />
+                    <Button Grid.Column="1" Content="✕" Command="{Binding ToggleDebugOverlayCommand}" />
+                </Grid>
+
+                <TabControl Grid.Row="1">
+                    <TabItem Header="🛠 Debug">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel Spacing="12">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Runtime" Classes="section-header" />
+                                    <TextBlock Text="{Binding DebugTickRateText}" Classes="subtle" />
+                                    <TextBlock Text="{Binding DebugFpsText}" Classes="subtle" />
+                                    <TextBlock Text="{Binding DebugUiUpdatesText}" Classes="subtle" />
+                                    <TextBlock Text="{Binding DebugOnlineStatus}" Classes="subtle" />
+                                    <TextBlock Text="{Binding DebugLastOffline}" Classes="subtle" />
+                                </StackPanel>
+
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Controls" Classes="section-header" />
+                                    <WrapPanel>
+                                        <Button Classes="accent" Content="⏱ Tick" Command="{Binding TickCommand}" />
+                                        <Button Content="⏲ Offline 10s" Command="{Binding OfflineCommand}" />
+                                        <Button Content="💰 Add Gold" Command="{Binding SandboxAddGoldCommand}" />
+                                        <Button Content="💾 Save" Command="{Binding SaveCommand}" />
+                                        <Button Content="📂 Load" Command="{Binding LoadCommand}" />
+                                    </WrapPanel>
+                                    <WrapPanel>
+                                        <ToggleButton Content="{Binding SandboxIcon}" IsChecked="{Binding SandboxEnabled}" Command="{Binding ToggleSandboxCommand}" />
+                                        <ToggleButton Content="{Binding LockIcon}" IsChecked="{Binding LockValuesEnabled}" Command="{Binding ToggleLockCommand}" />
+                                    </WrapPanel>
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <TextBlock Text="Zoom" Classes="subtle" />
+                                        <Slider Minimum="0.75" Maximum="1.5" Value="{Binding ZoomLevel}" Width="140" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+                    <TabItem Header="📦 Content">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel Spacing="12">
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Wallet" Classes="section-header" />
+                                    <ItemsControl ItemsSource="{Binding DebugWalletEntries}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <TextBlock Text="{Binding Name}" Width="120" />
+                                                    <TextBlock Text="{Binding ValueText}" Classes="subtle" Width="80" />
+                                                    <Button Content="+10" Command="{Binding AddCommand}" />
+                                                    <Button Content="-10" Command="{Binding RemoveCommand}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Inventory" Classes="section-header" />
+                                    <ItemsControl ItemsSource="{Binding DebugInventoryEntries}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <TextBlock Text="{Binding Name}" Width="120" />
+                                                    <TextBlock Text="{Binding ValueText}" Classes="subtle" Width="80" />
+                                                    <Button Content="+1" Command="{Binding AddCommand}" />
+                                                    <Button Content="-1" Command="{Binding RemoveCommand}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Skills" Classes="section-header" />
+                                    <ItemsControl ItemsSource="{Binding DebugSkillEntries}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate>
+                                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                                    <TextBlock Text="{Binding Name}" Width="120" />
+                                                    <TextBlock Text="{Binding ValueText}" Classes="subtle" Width="100" />
+                                                    <Button Content="+100 XP" Command="{Binding AddSmallCommand}" />
+                                                    <Button Content="+1000 XP" Command="{Binding AddLargeCommand}" />
+                                                </StackPanel>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+        </Border>
     </Grid>
 </Window>

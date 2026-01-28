@@ -16,6 +16,8 @@ content-packs/
       actions.json
       skills.json
       items.json
+      images.json
+      sprite-sheets.json
       quests.json
       worlds.json
       combat-ai.json
@@ -51,6 +53,8 @@ Example:
 The engine validates data files using schemas declared in the data layer:
 - actions.json
 - skills.json
+- images.json
+- sprite-sheets.json
 - status-effects.json
 - combat-ai.json
 

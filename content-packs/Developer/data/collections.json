@@ -1,0 +1,11 @@
+[
+    {
+        "id": "starter",
+        "name": "Starter Set",
+        "itemIds": [
+            "oak-log",
+            "sword",
+            "shield"
+        ]
+    }
+]

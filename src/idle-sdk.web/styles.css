@@ -177,14 +177,15 @@ body {
     justify-content: center;
     gap: 8px;
 }
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 16px;
-    align-items: start;
-    letter-spacing: 0.18em;
-    color: var(--text);
-    text-transform: uppercase;
-    margin-left: 0.18em;
+
+display: grid;
+grid-template-columns: repeat(2, minmax(0, 1fr));
+gap: 16px;
+align-items: start;
+letter-spacing: 0.18em;
+color: var(--text);
+text-transform: uppercase;
+margin-left: 0.18em;
 }
 
 .ring-level {
@@ -1555,6 +1556,7 @@ body {
     flex-direction: column;
     gap: 10px;
 }
+
 .upload-row {
     display: flex;
     flex-wrap: wrap;
@@ -1593,27 +1595,66 @@ body {
 }
 
 .overlay-panel.expanded {
-    width: min(1120px, 92vw);
+    width: min(1160px, 94vw);
     height: 92vh;
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+        "header header"
+        "tabs body";
+    gap: 12px 16px;
+}
+
+.overlay-panel.expanded .overlay-header {
+    grid-area: header;
+}
+
+.overlay-panel.expanded .overlay-tabs {
+    grid-area: tabs;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 8px;
+    border-right: 1px solid var(--card-border);
+    height: 100%;
+    overflow-y: auto;
 }
 
 .overlay-panel.expanded .overlay-body {
+    grid-area: body;
     flex: 1;
+    overflow: hidden;
 }
 
-.overlay-panel.expanded .tab-panel.layout-grid {
+.overlay-panel.expanded .tab-panel.layout-grid.active {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 16px;
     align-items: start;
 }
 
+.overlay-panel.expanded .tab-panel.active {
+    height: 100%;
+    overflow: auto;
+    padding-right: 4px;
+}
+
 .overlay-panel.expanded .panel-section {
     min-width: 0;
 }
 
-.overlay-panel.expanded .overlay-tabs {
-    justify-content: center;
+
+.overlay-panel.expanded .tab-panel.layout-grid .panel-section {
+    background: color-mix(in srgb, var(--panel) 70%, transparent);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    padding: 12px;
+}
+
+.overlay-panel.expanded .model-preview.model-viewport {
+    max-width: 100%;
+    aspect-ratio: 16 / 9;
 }
 
 .theme-dialog {
@@ -1806,7 +1847,7 @@ body {
 
 .module-prop {
     display: grid;
-    grid-template-columns: 1fr auto auto;
+    grid-template-columns: 1fr auto auto auto;
     gap: 8px;
     align-items: center;
     background: var(--panel);
@@ -1814,6 +1855,17 @@ body {
     border-radius: 10px;
     padding: 6px 8px;
     font-size: 12.5px;
+}
+
+.pin-toggle {
+    min-width: 32px;
+    padding: 2px 6px;
+    font-size: 13px;
+    line-height: 1;
+}
+
+.pin-toggle.is-pinned {
+    color: var(--accent);
 }
 
 .module-prop input[type="number"] {

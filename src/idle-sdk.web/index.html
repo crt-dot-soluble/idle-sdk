@@ -60,15 +60,6 @@
             <div id="splitterVertical" class="splitter vertical"></div>
 
             <main id="rightPanel" class="panel right">
-                <section id="gameView" class="card canvas-shell">
-                    <div class="card-header">
-                        <span>🖼 Game View</span>
-                    </div>
-                    <canvas id="pixiCanvas" class="game-canvas"></canvas>
-                </section>
-
-                <div id="splitterHorizontal" class="splitter horizontal"></div>
-
                 <section class="card skill-context tabs">
                     <div class="card-header">
                         <span>✨ Skill Context</span>
@@ -283,7 +274,7 @@
                 <button class="tab-button" data-tab="preview">🧊 3D Preview</button>
             </div>
             <div class="overlay-body">
-                <div class="tab-panel active" data-panel="overview">
+                <div class="tab-panel layout-grid active" data-panel="overview">
                     <div class="panel-section">
                         <div class="section-title">Runtime</div>
                         <div id="debugTickRate" class="subtle">Tick rate: --</div>
@@ -291,6 +282,10 @@
                         <div id="debugUiUpdates" class="subtle">UI updates/frame: --</div>
                         <div id="debugOnline" class="subtle">Online</div>
                         <div id="debugOffline" class="subtle">Last offline: n/a</div>
+                    </div>
+                    <div class="panel-section">
+                        <div class="section-title">Pinned</div>
+                        <div id="pinnedInspector" class="inspector"></div>
                     </div>
                     <div class="panel-section">
                         <div class="section-title">Shortcuts</div>
@@ -302,11 +297,10 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-panel" data-panel="controls">
+                <div class="tab-panel layout-grid" data-panel="controls">
                     <div class="panel-section">
                         <div class="section-title">Simulation</div>
                         <div class="button-row">
-                            <button id="addGoldBtn" class="button">💰 Add Gold</button>
                             <button id="resetDevBtn" class="button ghost dev-only">♻ Reset Dev</button>
                         </div>
                         <div class="button-row">
@@ -367,7 +361,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="tab-panel" data-panel="preview">
+                <div class="tab-panel layout-grid" data-panel="preview">
                     <div class="panel-section">
                         <div class="section-title">3D Model Preview</div>
                         <div class="model-preview model-viewport" data-model=""
@@ -377,8 +371,7 @@
                     <div class="panel-section">
                         <div class="section-title">Upload</div>
                         <div class="upload-row">
-                            <input id="modelUploadInput" class="text-input" type="file"
-                                accept=".glb,.gltf,.obj" />
+                            <input id="modelUploadInput" class="text-input" type="file" accept=".glb,.gltf,.obj" />
                             <button id="modelClearBtn" class="button ghost">Clear</button>
                         </div>
                         <div id="modelUploadName" class="subtle">No file selected.</div>

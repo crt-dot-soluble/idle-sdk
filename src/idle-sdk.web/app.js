@@ -32,6 +32,7 @@ const state = {
     isLocked: false,
     sandboxEnabled: true,
     zoom: 1,
+    renderFpsCap: 0,
     skillXpMultiplier: 1,
     rewardMultiplier: 1,
     cashMultiplier: 1,
@@ -136,6 +137,7 @@ const ui = {
     debugUiUpdates: document.getElementById("debugUiUpdates"),
     debugOnline: document.getElementById("debugOnline"),
     debugOffline: document.getElementById("debugOffline"),
+    pinnedInspector: document.getElementById("pinnedInspector"),
     walletInspector: document.getElementById("walletInspector"),
     inventoryInspector: document.getElementById("inventoryInspector"),
     skillInspector: document.getElementById("skillInspector"),
@@ -198,6 +200,16 @@ let threeModule = null;
 let gltfLoaderCtor = null;
 let objLoaderCtor = null;
 let modelUploadUrl = null;
+const modelTypeOverrides = new Map();
+const rawConsoleWarn = console.warn.bind(console);
+const rawConsoleError = console.error.bind(console);
+const rawConsoleInfo = (console.info ?? console.log).bind(console);
+let currentFps = 0;
+let tickRateObserved = 0;
+let telemetryElapsed = 0;
+const tickSamples = [];
+const pinnedProperties = new Set();
+const pinnedUi = new Map();
 
 const moduleState = {
     simulation: { enabled: true },
@@ -420,6 +432,20 @@ const moduleDefinitions = [
         description: "Visual effects and camera settings.",
         properties: [
             {
+                id: "fpsCap",
+                label: "FPS Cap",
+                type: "number",
+                min: 0,
+                max: 240,
+                step: 5,
+                get: () => state.renderFpsCap,
+                set: (value) => {
+                    const next = clamp(Number(value) || 0, 0, 240);
+                    state.renderFpsCap = next;
+                    persistModuleState();
+                }
+            },
+            {
                 id: "zoom",
                 label: "Zoom",
                 type: "number",
@@ -626,6 +652,7 @@ const DEV_MODE = location.hostname === "localhost"
 const STORAGE_KEY = "idle-sdk-web-demo-state";
 const MODULE_STORAGE_KEY = "idle-sdk-web-demo-modules";
 const THEME_STORAGE_KEY = "idle-sdk-web-demo-theme";
+const PINNED_STORAGE_KEY = "idle-sdk-web-demo-pins";
 const RING_RADIUS = 38;
 const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
@@ -660,11 +687,288 @@ function persistModuleState() {
             clickEnergyLevelUpBoost: state.clickEnergyLevelUpBoost,
             clickEnergyLevelUpPerLevel: state.clickEnergyLevelUpPerLevel,
             ringParticlesEnabled: state.ringParticlesEnabled,
-            zoom: state.zoom
+            zoom: state.zoom,
+            renderFpsCap: state.renderFpsCap
         },
         externalModules
     };
     localStorage.setItem(MODULE_STORAGE_KEY, JSON.stringify(snapshot));
+}
+
+function getDefaultPinnedProperties() {
+    return [
+        "telemetry.fps",
+        "module:simulation:tickRate",
+        "wallet.cash",
+        "wallet.credit"
+    ];
+}
+
+function loadPinnedProperties() {
+    const raw = localStorage.getItem(PINNED_STORAGE_KEY);
+    if (raw) {
+        try {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed)) {
+                pinnedProperties.clear();
+                parsed.forEach((id) => pinnedProperties.add(id));
+            }
+        } catch {
+            pinnedProperties.clear();
+        }
+    }
+    if (pinnedProperties.size === 0) {
+        getDefaultPinnedProperties().forEach((id) => pinnedProperties.add(id));
+    }
+    savePinnedProperties();
+}
+
+function savePinnedProperties() {
+    localStorage.setItem(PINNED_STORAGE_KEY, JSON.stringify([...pinnedProperties]));
+}
+
+function isPinned(id) {
+    return pinnedProperties.has(id);
+}
+
+function togglePin(id) {
+    if (pinnedProperties.has(id)) {
+        pinnedProperties.delete(id);
+    } else {
+        pinnedProperties.add(id);
+    }
+    savePinnedProperties();
+    renderPinnedProperties();
+    renderModules();
+    renderContentPacks();
+}
+
+function createPinButton(id) {
+    const button = document.createElement("button");
+    button.className = `button ghost pin-toggle${isPinned(id) ? " is-pinned" : ""}`;
+    button.type = "button";
+    button.textContent = isPinned(id) ? "★" : "☆";
+    button.title = isPinned(id) ? "Unpin from Overview" : "Pin to Overview";
+    button.onclick = () => togglePin(id);
+    return button;
+}
+
+function getTelemetryDescriptor(id) {
+    if (id === "telemetry.fps") {
+        return {
+            id,
+            label: "FPS",
+            type: "readonly",
+            get: () => currentFps
+        };
+    }
+    return null;
+}
+
+function getWalletDescriptor(id) {
+    const [, currencyId] = id.split(".");
+    if (!currencyId || !(currencyId in state.wallet)) return null;
+    const label = CURRENCY_DEFS[currencyId]?.name ?? currencyId;
+    return {
+        id,
+        label,
+        type: "number",
+        min: 0,
+        max: 999999,
+        step: 1,
+        get: () => state.wallet[currencyId],
+        set: (value) => {
+            const next = Math.max(0, Math.floor(Number(value) || 0));
+            state.wallet[currencyId] = next;
+            updateLists();
+        }
+    };
+}
+
+function getModuleDescriptor(moduleId, propId) {
+    const module = [...moduleDefinitions, ...externalModules]
+        .find((entry) => entry.id === moduleId);
+    if (!module || !Array.isArray(module.properties)) return null;
+    const prop = module.properties.find((entry) => entry.id === propId);
+    if (!prop) return null;
+    return {
+        id: `module:${moduleId}:${propId}`,
+        label: prop.label ?? prop.id,
+        type: prop.type === "boolean" ? "boolean" : "number",
+        min: Number.isFinite(prop.min) ? prop.min : 0,
+        max: Number.isFinite(prop.max) ? prop.max : 999,
+        step: Number.isFinite(prop.step) ? prop.step : 1,
+        get: () => (prop.get ? prop.get() : prop.value),
+        set: (value) => {
+            if (prop.set) {
+                prop.set(value);
+            } else if (prop.type === "boolean") {
+                prop.value = Boolean(value);
+            } else {
+                prop.value = Number(value);
+            }
+            persistModuleState();
+            renderModules();
+        }
+    };
+}
+
+function getPackDescriptor(packId, propId) {
+    const pack = state.contentPacks.find((entry) => entry.id === packId);
+    if (!pack || !Array.isArray(pack.properties)) return null;
+    const prop = pack.properties.find((entry) => entry.id === propId);
+    if (!prop) return null;
+    return {
+        id: `pack:${packId}:${propId}`,
+        label: prop.label ?? prop.id,
+        type: prop.type === "boolean" ? "boolean" : "number",
+        min: Number.isFinite(prop.min) ? prop.min : 0,
+        max: Number.isFinite(prop.max) ? prop.max : 999,
+        step: Number.isFinite(prop.step) ? prop.step : 1,
+        get: () => (prop.get ? prop.get() : prop.value),
+        set: (value) => {
+            if (prop.set) {
+                prop.set(value);
+            } else if (prop.type === "boolean") {
+                prop.value = Boolean(value);
+            } else {
+                prop.value = Number(value);
+            }
+            renderContentPacks();
+        }
+    };
+}
+
+function getPinnedDescriptor(id) {
+    if (id.startsWith("telemetry.")) return getTelemetryDescriptor(id);
+    if (id.startsWith("wallet.")) return getWalletDescriptor(id);
+    if (id.startsWith("module:")) {
+        const [, moduleId, propId] = id.split(":");
+        return getModuleDescriptor(moduleId, propId);
+    }
+    if (id.startsWith("pack:")) {
+        const [, packId, propId] = id.split(":");
+        return getPackDescriptor(packId, propId);
+    }
+    if (id === "simulation.tickRate") {
+        return {
+            id,
+            label: "Tick Rate",
+            type: "number",
+            min: 0.5,
+            max: 5,
+            step: 0.5,
+            get: () => state.tickRate,
+            set: (value) => applyTickRate(value)
+        };
+    }
+    return null;
+}
+
+function renderPinnedProperties() {
+    if (!ui.pinnedInspector) return;
+    ui.pinnedInspector.innerHTML = "";
+    pinnedUi.clear();
+    [...pinnedProperties].forEach((id) => {
+        const descriptor = getPinnedDescriptor(id);
+        if (!descriptor) {
+            pinnedProperties.delete(id);
+            return;
+        }
+        const row = document.createElement("div");
+        row.className = "module-prop pinned-prop";
+        const label = document.createElement("span");
+        label.textContent = descriptor.label;
+        row.appendChild(label);
+
+        let input = null;
+        let value = null;
+
+        if (descriptor.type === "boolean") {
+            input = document.createElement("input");
+            input.type = "checkbox";
+            input.checked = Boolean(descriptor.get());
+            input.onchange = () => descriptor.set?.(input.checked);
+            row.appendChild(input);
+        } else if (descriptor.type === "readonly") {
+            value = document.createElement("span");
+            value.className = "subtle";
+            row.appendChild(value);
+        } else {
+            input = document.createElement("input");
+            input.className = "text-input";
+            input.type = "number";
+            input.min = descriptor.min ?? 0;
+            input.max = descriptor.max ?? 999;
+            input.step = descriptor.step ?? 1;
+            input.value = descriptor.get();
+            input.onchange = () => descriptor.set?.(input.value);
+            value = document.createElement("span");
+            value.className = "subtle";
+            value.textContent = input.value;
+            input.oninput = () => {
+                value.textContent = input.value;
+            };
+            row.appendChild(input);
+            row.appendChild(value);
+        }
+
+        row.appendChild(createPinButton(id));
+        ui.pinnedInspector.appendChild(row);
+        pinnedUi.set(id, { descriptor, input, value });
+    });
+    savePinnedProperties();
+    updatePinnedValues();
+}
+
+function updatePinnedValues() {
+    pinnedUi.forEach((entry) => {
+        const current = entry.descriptor.get?.();
+        if (entry.descriptor.type === "readonly") {
+            if (entry.value) {
+                entry.value.textContent = Number.isFinite(current)
+                    ? `${Math.round(current)}`
+                    : `${current ?? "--"}`;
+            }
+            return;
+        }
+        if (entry.input && document.activeElement !== entry.input) {
+            if (entry.descriptor.type === "boolean") {
+                entry.input.checked = Boolean(current);
+            } else if (current != null) {
+                entry.input.value = current;
+            }
+        }
+        if (entry.value && entry.descriptor.type !== "boolean") {
+            entry.value.textContent = entry.input?.value ?? "--";
+        }
+    });
+}
+
+function updateDebugTelemetry() {
+    if (ui.debugFps) {
+        ui.debugFps.textContent = `FPS: ${Math.round(currentFps)}`;
+    }
+    if (ui.debugTickRate) {
+        const observed = Number.isFinite(tickRateObserved) ? tickRateObserved : 0;
+        ui.debugTickRate.textContent = `Tick rate: ${observed.toFixed(2)}/s • Target ${state.tickRate}/s • Tick ${state.tick}`;
+    }
+    updatePinnedValues();
+}
+
+function recordTickSample() {
+    const now = performance.now();
+    tickSamples.push(now);
+    const horizon = 3000;
+    while (tickSamples.length && tickSamples[0] < now - horizon) {
+        tickSamples.shift();
+    }
+    if (tickSamples.length > 1) {
+        const span = (tickSamples[tickSamples.length - 1] - tickSamples[0]) / 1000;
+        tickRateObserved = span > 0 ? (tickSamples.length - 1) / span : 0;
+    } else {
+        tickRateObserved = 0;
+    }
 }
 
 function applyDevModeUI() {
@@ -732,7 +1036,7 @@ function renderErrorList() {
     }
 }
 
-function logIssue(level, message, detail) {
+function logIssue(level, message, detail, emitConsole = true) {
     if (detail && detail.__logged) return;
     if (detail && typeof detail === "object") {
         detail.__logged = true;
@@ -749,21 +1053,29 @@ function logIssue(level, message, detail) {
     }
     updateErrorButton();
     renderErrorList();
+    if (emitConsole) {
+        const logArgs = detail ? [message, detail] : [message];
+        if (level === "error") {
+            rawConsoleError(...logArgs);
+        } else if (level === "warn") {
+            rawConsoleWarn(...logArgs);
+        } else {
+            rawConsoleInfo(...logArgs);
+        }
+    }
     if (level === "error" && ui.errorDialog) {
         ui.errorDialog.classList.remove("hidden");
     }
 }
 
 function setupErrorLogging() {
-    const originalWarn = console.warn.bind(console);
-    const originalError = console.error.bind(console);
     console.warn = (...args) => {
-        originalWarn(...args);
-        logIssue("warn", args.map(formatErrorPayload).join(" "), args.find((arg) => arg instanceof Error));
+        rawConsoleWarn(...args);
+        logIssue("warn", args.map(formatErrorPayload).join(" "), args.find((arg) => arg instanceof Error), false);
     };
     console.error = (...args) => {
-        originalError(...args);
-        logIssue("error", args.map(formatErrorPayload).join(" "), args.find((arg) => arg instanceof Error));
+        rawConsoleError(...args);
+        logIssue("error", args.map(formatErrorPayload).join(" "), args.find((arg) => arg instanceof Error), false);
     };
     window.addEventListener("error", (event) => {
         logIssue("error", event.message || "Window error", event.error || event);
@@ -966,6 +1278,9 @@ function restoreModuleState() {
             if (Number.isFinite(snapshot.values.zoom)) {
                 state.zoom = snapshot.values.zoom;
             }
+            if (Number.isFinite(snapshot.values.renderFpsCap)) {
+                state.renderFpsCap = snapshot.values.renderFpsCap;
+            }
         }
         if (Array.isArray(snapshot?.externalModules)) {
             externalModules.length = 0;
@@ -979,7 +1294,7 @@ function restoreModuleState() {
 function applyTickRate(value) {
     state.tickRate = clamp(Number(value) || 1, 0.5, 5);
     if (ui.debugTickRate) {
-        ui.debugTickRate.textContent = `Tick rate: ${state.tickRate}/s • Tick ${state.tick}`;
+        updateDebugTelemetry();
     }
     refreshTickLoop();
     persistModuleState();
@@ -1956,9 +2271,13 @@ function applyActiveSkillClick() {
     updateInspectors();
 }
 
-function tickOnce() {
+function tickOnce(options = {}) {
     if (state.isLocked || !isModuleEnabled("simulation")) return;
+    const { recordSample = true } = options;
     state.tick += 1;
+    if (recordSample) {
+        recordTickSample();
+    }
     const active = state.skills.find((s) => s.active);
     if (active) {
         applySkillTick(active, true);
@@ -1966,7 +2285,7 @@ function tickOnce() {
     const combatLine = state.tick % 2 === 0 ? "player hits slime (3)" : "slime misses";
     state.combat.unshift(combatLine);
     state.combat = state.combat.slice(0, 5);
-    ui.debugTickRate.textContent = `Tick rate: ${state.tickRate}/s • Tick ${state.tick}`;
+    updateDebugTelemetry();
     updateLists();
 }
 
@@ -1975,7 +2294,7 @@ function runOffline(seconds) {
     ui.debugOnline.textContent = "Offline (reconciling)";
     ui.debugOffline.textContent = `Last offline: ${seconds}s`;
     for (let i = 0; i < seconds; i++) {
-        tickOnce();
+        tickOnce({ recordSample: false });
     }
     ui.debugOnline.textContent = "Online";
 }
@@ -2154,6 +2473,7 @@ function updateLists() {
     renderList(ui.compendiumList, state.compendium);
     ui.saveStatus.textContent = state.saveStatus;
     updateInspectors();
+    updatePinnedValues();
 }
 
 function updateInspectors() {
@@ -2288,6 +2608,57 @@ function renderContentPacks() {
             row.innerHTML = `<span>${prop.label}</span><span class="subtle">${prop.value}</span>`;
             card.appendChild(row);
         });
+
+        (pack.properties ?? []).forEach((prop) => {
+            if (!prop?.id) return;
+            const row = document.createElement("div");
+            row.className = "module-prop";
+            const label = document.createElement("span");
+            label.textContent = prop.label ?? prop.id;
+            if (prop.type === "boolean") {
+                const input = document.createElement("input");
+                input.type = "checkbox";
+                input.checked = Boolean(prop.get ? prop.get() : prop.value);
+                input.onchange = () => {
+                    if (prop.set) {
+                        prop.set(input.checked);
+                    } else {
+                        prop.value = input.checked;
+                    }
+                    renderContentPacks();
+                };
+                row.appendChild(label);
+                row.appendChild(input);
+            } else {
+                const input = document.createElement("input");
+                input.className = "text-input";
+                input.type = "number";
+                input.min = prop.min ?? 0;
+                input.max = prop.max ?? 999;
+                input.step = prop.step ?? 1;
+                input.value = prop.get ? prop.get() : prop.value ?? 0;
+                input.onchange = () => {
+                    const next = Number(input.value);
+                    if (prop.set) {
+                        prop.set(next);
+                    } else {
+                        prop.value = next;
+                    }
+                    renderContentPacks();
+                };
+                const value = document.createElement("span");
+                value.className = "subtle";
+                value.textContent = input.value;
+                input.oninput = () => {
+                    value.textContent = input.value;
+                };
+                row.appendChild(label);
+                row.appendChild(input);
+                row.appendChild(value);
+            }
+            row.appendChild(createPinButton(`pack:${pack.id}:${prop.id}`));
+            card.appendChild(row);
+        });
         ui.contentPackInspector.appendChild(card);
     });
 }
@@ -2331,6 +2702,7 @@ function renderModules() {
         card.appendChild(header);
 
         (module.properties ?? []).forEach((prop) => {
+            if (!prop?.id) return;
             const row = document.createElement("div");
             row.className = "module-prop";
             const label = document.createElement("span");
@@ -2378,6 +2750,7 @@ function renderModules() {
                 row.appendChild(input);
                 row.appendChild(value);
             }
+            row.appendChild(createPinButton(`module:${module.id}:${prop.id}`));
             card.appendChild(row);
         });
 
@@ -2442,6 +2815,14 @@ function clearExternalModules() {
 
 function animate(now) {
     if (!running) return;
+    const frameCap = Number(state.renderFpsCap) || 0;
+    if (frameCap > 0) {
+        const minFrame = 1000 / frameCap;
+        if (now - lastTick < minFrame) {
+            requestAnimationFrame(animate);
+            return;
+        }
+    }
     const delta = (now - lastTick) / 1000;
     if (!Number.isFinite(delta) || delta <= 0) {
         requestAnimationFrame(animate);
@@ -2451,10 +2832,15 @@ function animate(now) {
     fpsFrames += 1;
     fpsElapsed += delta;
     if (fpsElapsed >= 1) {
-        const fps = Math.round(fpsFrames / fpsElapsed);
-        ui.debugFps.textContent = `FPS: ${fps}`;
+        currentFps = fpsFrames / fpsElapsed;
+        updateDebugTelemetry();
         fpsFrames = 0;
         fpsElapsed = 0;
+    }
+    telemetryElapsed += delta;
+    if (telemetryElapsed >= 0.5) {
+        telemetryElapsed = 0;
+        updateDebugTelemetry();
     }
     updateSkillBars(delta);
     if (modelRenderer && isModuleEnabled("renderer3d")) {
@@ -2762,7 +3148,16 @@ class ModelRenderer {
 
     isGltf(url) {
         const clean = url.split("?")[0].toLowerCase();
-        return clean.endsWith(".glb") || clean.endsWith(".gltf");
+        if (clean.endsWith(".glb") || clean.endsWith(".gltf")) return true;
+        const override = modelTypeOverrides.get(url);
+        if (!override) return false;
+        if (override.ext) {
+            return override.ext === "glb" || override.ext === "gltf";
+        }
+        if (override.type) {
+            return override.type === "model/gltf-binary" || override.type === "model/gltf+json";
+        }
+        return false;
     }
 
     getLoader(url) {
@@ -2946,11 +3341,6 @@ function setupControls() {
     ui.taskAction.onclick = toggleSkillAction;
     document.getElementById("tickBtn").onclick = tickOnce;
     document.getElementById("offlineBtn").onclick = () => runOffline(10);
-    document.getElementById("addGoldBtn").onclick = () => {
-        state.wallet.gold += 10;
-        updateLists();
-        updateInspectors();
-    };
     document.getElementById("saveBtn").onclick = saveSnapshot;
     document.getElementById("loadBtn").onclick = loadSnapshot;
     const resetBtn = document.getElementById("resetDevBtn");
@@ -3065,8 +3455,14 @@ function setupModelUpload() {
         if (!file) return;
         if (modelUploadUrl) {
             URL.revokeObjectURL(modelUploadUrl);
+            modelTypeOverrides.delete(modelUploadUrl);
         }
         modelUploadUrl = URL.createObjectURL(file);
+        const ext = file.name?.split(".").pop()?.toLowerCase() ?? "";
+        modelTypeOverrides.set(modelUploadUrl, {
+            ext,
+            type: file.type
+        });
         setLabel(file.name);
         setPreviewUrl(modelUploadUrl);
     });
@@ -3075,6 +3471,7 @@ function setupModelUpload() {
         clearBtn.addEventListener("click", () => {
             if (modelUploadUrl) {
                 URL.revokeObjectURL(modelUploadUrl);
+                modelTypeOverrides.delete(modelUploadUrl);
                 modelUploadUrl = null;
             }
             if (input) {
@@ -3104,7 +3501,6 @@ async function setupPixi() {
 
     const canvas = document.getElementById("pixiCanvas");
     if (!canvas) {
-        console.warn("PIXI canvas not found - skipping renderer init.");
         return;
     }
 
@@ -3161,6 +3557,7 @@ function setupPwa() {
 async function main() {
     setupErrorLogging();
     restoreModuleState();
+    loadPinnedProperties();
     if (DEV_MODE && localStorage.getItem(STORAGE_KEY)) {
         loadSnapshot();
     }
@@ -3170,7 +3567,6 @@ async function main() {
     applyDevModeUI();
     updateErrorButton();
 
-    ui.debugTickRate.textContent = `Tick rate: ${state.tickRate}/s`;
     ui.debugOnline.textContent = "Online";
     ui.debugOffline.textContent = `Last offline: ${lastOfflineSeconds}s`;
     ui.debugUiUpdates.textContent = "UI updates/frame: --";
@@ -3179,6 +3575,8 @@ async function main() {
     renderSkills();
     updateLists();
     updateInspectors();
+    renderPinnedProperties();
+    updateDebugTelemetry();
     refreshToggleButtons();
     renderSkillContext();
     setupTabs();

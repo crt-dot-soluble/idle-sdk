@@ -8,7 +8,7 @@ public sealed class JsonStateSerializer<T> : IStateSerializer<T>
 
     public JsonStateSerializer(JsonSerializerOptions? options = null)
     {
-        _options = options ?? new JsonSerializerOptions { WriteIndented = true };
+        _options = options ?? new JsonSerializerOptions { WriteIndented = false };
     }
 
     public string Serialize(T state) => JsonSerializer.Serialize(state, _options);

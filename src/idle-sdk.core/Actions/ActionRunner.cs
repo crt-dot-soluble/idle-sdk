@@ -65,7 +65,12 @@ public sealed class ActionRunner
 
     public IReadOnlyDictionary<string, ActionCooldownState> GetCooldownSnapshot()
     {
-        return _executions.ToDictionary(pair => pair.Key, pair => pair.Value.GetState(), StringComparer.OrdinalIgnoreCase);
+        var snapshot = new Dictionary<string, ActionCooldownState>(_executions.Count, StringComparer.OrdinalIgnoreCase);
+        foreach (var pair in _executions)
+        {
+            snapshot[pair.Key] = pair.Value.GetState();
+        }
+        return snapshot;
     }
 
     public void RestoreCooldownSnapshot(IReadOnlyDictionary<string, ActionCooldownState> snapshot)

@@ -33,8 +33,10 @@ public sealed class CombatEncounter
 
     public CombatTickResult Tick()
     {
-        var logs = new List<CombatLogEntry>();
-        var decisions = new List<CombatAiDecision>();
+        var logs = new List<CombatLogEntry>(_combatants.Count);
+        var decisions = _combatAi is null
+            ? new List<CombatAiDecision>(0)
+            : new List<CombatAiDecision>(_combatants.Count);
         foreach (var combatant in _combatants)
         {
             combatant.Effects.Tick();
@@ -46,12 +48,6 @@ public sealed class CombatEncounter
             if (attacker.IsDefeated)
             {
                 continue;
-            }
-
-            var candidates = _combatants.Where(c => !c.IsDefeated && c != attacker).ToList();
-            if (candidates.Count == 0)
-            {
-                break;
             }
 
             CombatantState? target = null;
@@ -67,7 +63,20 @@ public sealed class CombatEncounter
                 }
             }
 
-            target ??= candidates.FirstOrDefault();
+            if (target is null || target.IsDefeated || ReferenceEquals(target, attacker))
+            {
+                for (var j = 0; j < _combatants.Count; j++)
+                {
+                    var candidate = _combatants[j];
+                    if (candidate.IsDefeated || ReferenceEquals(candidate, attacker))
+                    {
+                        continue;
+                    }
+                    target = candidate;
+                    break;
+                }
+            }
+
             if (target is null)
             {
                 break;

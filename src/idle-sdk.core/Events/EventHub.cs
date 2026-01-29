@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Collections.Concurrent;
 
 namespace IdleSdk.Core.Events;
@@ -27,29 +28,43 @@ public sealed class EventHub
 
     public void Publish<TEvent>(TEvent eventData)
     {
-        List<Delegate>? snapshot = null;
-        if (_handlers.TryGetValue(typeof(TEvent), out var handlers))
-        {
-            lock (_gate)
-            {
-                snapshot = handlers.ToList();
-            }
-        }
-
-        if (snapshot is null)
+        if (!_handlers.TryGetValue(typeof(TEvent), out var handlers))
         {
             return;
         }
 
-        foreach (var handler in snapshot)
+        Delegate[]? snapshot = null;
+        var count = 0;
+        try
         {
-            try
+            lock (_gate)
             {
-                ((Action<TEvent>)handler)(eventData);
+                count = handlers.Count;
+                if (count == 0)
+                {
+                    return;
+                }
+                snapshot = ArrayPool<Delegate>.Shared.Rent(count);
+                handlers.CopyTo(snapshot, 0);
             }
-            catch (Exception ex)
+
+            for (var i = 0; i < count; i++)
             {
-                HandlerException?.Invoke(ex, eventData);
+                try
+                {
+                    ((Action<TEvent>)snapshot![i])(eventData);
+                }
+                catch (Exception ex)
+                {
+                    HandlerException?.Invoke(ex, eventData);
+                }
+            }
+        }
+        finally
+        {
+            if (snapshot is not null)
+            {
+                ArrayPool<Delegate>.Shared.Return(snapshot, true);
             }
         }
     }

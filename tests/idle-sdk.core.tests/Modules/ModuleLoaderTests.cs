@@ -12,9 +12,9 @@ public class ModuleLoaderTests
         var registry = new ModuleRegistry();
         var order = new List<string>();
 
-        var core = new TestModule("core", order);
-        var gameplay = new TestModule("gameplay", order, new ModuleDependency("core", new Version(1, 0, 0)));
-        var ui = new TestModule("ui", order, new ModuleDependency("gameplay", new Version(1, 0, 0)));
+        var core = new TestModule("core", "Core", order);
+        var gameplay = new TestModule("gameplay", "Gameplay", order, new ModuleDependency("core", new Version(1, 0, 0)));
+        var ui = new TestModule("ui", "UI", order, new ModuleDependency("gameplay", new Version(1, 0, 0)));
 
         registry.Register(core);
         registry.Register(gameplay);
@@ -32,20 +32,26 @@ public class ModuleLoaderTests
     {
         private readonly List<string> _order;
 
-        public TestModule(string name, List<string> order, params ModuleDependency[] dependencies)
+        public TestModule(string id, string name, List<string> order, params ModuleDependency[] dependencies)
         {
+            Id = id;
             Name = name;
             Dependencies = dependencies;
             _order = order;
         }
 
+        public string Id { get; }
         public string Name { get; }
         public Version Version { get; } = new(1, 0, 0);
         public IReadOnlyCollection<ModuleDependency> Dependencies { get; }
 
         public void Initialize(ModuleContext context)
         {
-            _order.Add(Name);
+        }
+
+        public void Start(ModuleContext context)
+        {
+            _order.Add(Id);
         }
     }
 }

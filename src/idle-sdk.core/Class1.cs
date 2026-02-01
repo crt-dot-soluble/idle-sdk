@@ -15,8 +15,8 @@ public sealed class SimulationClock
 		TickDuration = TimeSpan.FromSeconds(1d / tickRate);
 	}
 
-	public int TickRate { get; }
-	public TimeSpan TickDuration { get; }
+	public int TickRate { get; private set; }
+	public TimeSpan TickDuration { get; private set; }
 	public long TotalTicks { get; private set; }
 	public TimeSpan TotalSimulatedTime => TimeSpan.FromTicks(TotalTicks * TickDuration.Ticks);
 
@@ -44,5 +44,16 @@ public sealed class SimulationClock
 	{
 		_accumulator = TimeSpan.Zero;
 		TotalTicks = 0;
+	}
+
+	public void UpdateTickRate(int tickRate)
+	{
+		if (tickRate <= 0)
+		{
+			throw new ArgumentOutOfRangeException(nameof(tickRate), "Tick rate must be positive.");
+		}
+
+		TickRate = tickRate;
+		TickDuration = TimeSpan.FromSeconds(1d / tickRate);
 	}
 }

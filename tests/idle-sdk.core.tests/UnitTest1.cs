@@ -39,23 +39,25 @@ public class EngineSpineTests
     {
         var registry = new ModuleRegistry();
 
-        registry.Register(new TestModule("B", new Version(1, 0), Array.Empty<ModuleDependency>()));
-        registry.Register(new TestModule("A", new Version(1, 0), new[] { new ModuleDependency("B", new Version(1, 0)) }));
+        registry.Register(new TestModule("B", "Module B", new Version(1, 0), Array.Empty<ModuleDependency>()));
+        registry.Register(new TestModule("A", "Module A", new Version(1, 0), new[] { new ModuleDependency("B", new Version(1, 0)) }));
 
         var ordered = registry.ResolveLoadOrder();
 
-        Assert.Equal(new[] { "B", "A" }, ordered.Select(m => m.Name));
+        Assert.Equal(new[] { "B", "A" }, ordered.Select(m => m.Id));
     }
 
     private sealed class TestModule : IModule
     {
-        public TestModule(string name, Version version, IReadOnlyCollection<ModuleDependency> dependencies)
+        public TestModule(string id, string name, Version version, IReadOnlyCollection<ModuleDependency> dependencies)
         {
+            Id = id;
             Name = name;
             Version = version;
             Dependencies = dependencies;
         }
 
+        public string Id { get; }
         public string Name { get; }
         public Version Version { get; }
         public IReadOnlyCollection<ModuleDependency> Dependencies { get; }

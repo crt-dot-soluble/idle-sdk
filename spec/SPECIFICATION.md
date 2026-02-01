@@ -145,6 +145,10 @@
 - Data: In-memory demo data packs (no external content required).
 - Web demo tooling:
    - Provide a debug-panel 3D viewport using Three.js to preview GLB models for validation.
+   - Provide a debug-only expanded 3D viewer pane that opens from model previews/icons when explicitly enabled in the debug module controls.
+     - Interactions: orbit rotate, pan, zoom, and reset to default framing.
+     - The expanded viewer must be modular and swappable to support a future “hover-to-expand” surface.
+   - Display modes must default to responsive auto selection, while manual overrides remain available for debugging.
 
 ## Rollout & Migration
 - Migration steps:

@@ -66,6 +66,7 @@ public sealed class DemoViewModel : INotifyPropertyChanged
     private TimeSpan _frameAccumulator = TimeSpan.Zero;
     private static readonly TimeSpan SimulationStep = TimeSpan.FromSeconds(1);
     private static readonly TimeSpan FrameInterval = TimeSpan.FromSeconds(1d / 60d);
+    private TimeSpan _frameInterval = FrameInterval;
 
     private SceneFrame _previousScene = new();
     private SceneFrame _currentScene = new();
@@ -178,7 +179,7 @@ public sealed class DemoViewModel : INotifyPropertyChanged
 
         _trainingTimer = new DispatcherTimer
         {
-            Interval = FrameInterval
+            Interval = _frameInterval
         };
         _trainingTimer.Tick += (_, _) => OnFrame();
 
@@ -577,6 +578,29 @@ public sealed class DemoViewModel : INotifyPropertyChanged
             _walletService.Credit(ProfileId, "gold", 5);
             UpdateWallets();
             return new SandboxResult(true, "Added 5 gold.");
+        });
+
+        _sandboxConsole.Register("set-tick-rate", command =>
+        {
+            if (!command.Arguments.TryGetValue("value", out var raw) || !int.TryParse(raw, out var rate))
+            {
+                return new SandboxResult(false, "Usage: set-tick-rate value=<int>");
+            }
+            _clock.UpdateTickRate(rate);
+            DebugTickRateText = $"Tick rate: {_clock.TickRate}/s";
+            return new SandboxResult(true, $"Tick rate set to {_clock.TickRate}/s.");
+        });
+
+        _sandboxConsole.Register("set-frame-rate", command =>
+        {
+            if (!command.Arguments.TryGetValue("value", out var raw) || !double.TryParse(raw, out var fps) || fps <= 0)
+            {
+                return new SandboxResult(false, "Usage: set-frame-rate value=<fps>");
+            }
+
+            _frameInterval = TimeSpan.FromSeconds(1d / fps);
+            _trainingTimer.Interval = _frameInterval;
+            return new SandboxResult(true, $"Frame rate set to {fps:0.##} fps.");
         });
     }
 
